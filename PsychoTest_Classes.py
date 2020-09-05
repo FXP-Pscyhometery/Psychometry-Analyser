@@ -5,18 +5,22 @@ ChapterTypes = { "language": 23,"math": 20,"english": 22 } # a dictionary to set
 
 class PsychoTest_chapter: #A class for a psychometry generic-type chapter
     
-    def __init__(self, typeOfChapter, numberOfChapter, period, year): #Constructor
+    def __init__(self, typeOfChapter, numberOfChapter, period, year, q_a = None): #Constructor
         self.typeOfChapter = typeOfChapter
         self.numberOfChapter = numberOfChapter
         self.period = period
         self.year = year
-        self.q_a = [0]*ChapterTypes[typeOfChapter]
+        if q_a == None:
+            self.q_a = [0]*ChapterTypes[typeOfChapter]
+        else:
+            self.q_a = q_a
 
     def enterAnswers(self): # A function, that lets the user enter his answers to the chapter Object.
         print("Entered blank/new chapter state, enter answers now:")
         for i in range(len(self.q_a)):
             self.q_a[i]= int(input(f"Answer to question number {i+1}: "))
         print("Finished entering answers to this chapter!")
+
     def modifyAnswers(self): #
         print("Entered chapter modify state:")
         Times = int(input("How many q&a you want to modify?: "))
@@ -34,16 +38,24 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
             answer += f"| Question number {i+1}| Answer number {self.q_a[i]} |\n"
         answer+= "#"*40
         return answer
-    def toDictForm(self): # Takes a given Chapter Object and returns a new dictonary rperesentation of the object. Used for seralization..
-        answer = {}
-        answer["typeOfChapter"] = self.typeOfChapter
-        answer["numberOfChapter"] = self.numberOfChapter
-        answer["period"] = self.period
-        answer["year"] = self.year
-        answer["q_a"] = self.q_a
-        return answer
-    def fromDictForm(dictForm): # Takes a given dictionary and create/restore an object by it. Restoring from seralization.
-        return cls(dictForm["typeOfChapter"],dictForm["numberOfChapter"],dictForm["period"],dictForm["year"],dictForm["q_a"])
+#    def toDictForm(self,oldDataBase,mode): # Takes a given Chapter Object and returns a new dictonary rperesentation of the object. Used for seralization..
+#        if mode == "ADD":
+#            if not self.year in oldDataBase.keys():
+#                oldDataBase[self.year] = {}
+#            if not self.period in oldDataBase[self.year].keys():
+#                oldDataBase[self.year][self.period] = {}
+#            if not self.typeOfChapter in oldDataBase[self.year][self.period].keys():
+#                oldDataBase[self.year][self.period][self.typeOfChapter] = {}
+#            if i.numberOfChapter in oldDataBase[self.year][self.period][self.typeOfChapter].keys():
+#                print("This chapter already exist. Please go to MODIFY mode, to fix the wanted chapter answers in the database if needed.")
+#            else:
+#                oldDataBase[self.year][self.period][self.typeOfChapter][self.numberOfChapter] = self.q_a
+
+        
+#    def reCreate(self,typeOfChapter,numberOfChapter,period,year,q_a): # Takes a given dictionary and create/restore an object by it. Restoring from seralization.
+#        answer =  cls(typeOfChapter,numberOfChapter,period,year)
+#        answer.q_a = q_a
+#        return answer
     def compareWith_q_a_excluded(self, Chapter1): #When you want to check if an Chapter obj is the same of another, but not checking the q_a.
         if (Chapter1 == None) or (not isinstance(Chapter1,cls)):
             return False
