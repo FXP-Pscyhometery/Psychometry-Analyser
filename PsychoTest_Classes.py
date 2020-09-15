@@ -1,4 +1,5 @@
 import datetime
+import statistics
 
 ChapterTypes = { "language": 23,"math": 20,"english": 22 } # a dictionary to set the diffrent types of Psychometry chapters
 
@@ -35,7 +36,7 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
         answer = f" Psychometry {self.typeOfChapter} chapter , Number: {self.numberOfChapter}, from the {self.period} {self.year} Edition: \nQuestions and Answers:\n"+"#"*40+"\n"
         
         for i in range(len(self.q_a)):
-            answer += f"| Question number {i+1}| Answer number {self.q_a[i]} |\n"
+            answer += f"| Question number {i+1} | Answer number {self.q_a[i]} |\n"
         answer+= "#"*40
         return answer
 #    def toDictForm(self,oldDataBase,mode): # Takes a given Chapter Object and returns a new dictonary rperesentation of the object. Used for seralization..
@@ -62,30 +63,80 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
         return (self.typeOfChapter==Chapter1.typeOfChapter) and (self.numberOfChapter==Chapter1.numberOfChapter) and (self.period==Chapter1.period) and (self.year==Chapter1.year)
     def is_q_a_Empty(self): # Returns True if the answers of the chapter obj is empty or if the chapter is new. Else, of course returns False.
         return self.q_a == [0]*ChapterTypes[self.typeOfChapter]
+    def checkAnswers(self,DataBase): # Investigate given chapter with a given DataBase, and returns the analysis result.
+        if DataBase == {}:
+            return "Empty DataBase"
+        if not self.year in DataBase:
+            return "Year of chapter isn't in DataBase. Maybe cause you wrote it wrong?"
+        if not self.period in DataBase[self.year]:
+            return "Period of chapter isn't in DataBase. Maybe cause you wrote it wrong?"
+        if not self.typeOfChapter in DataBase[self.year][self.period]:
+            return "Type of chapter isn't in DataBase. Maybe cause you wrote it wrong?"
+        if not self.numberOfChapter in DataBase[self.year][self.period][self.typeOfChapter]:
+            return "ID number of chapter isn't in DataBase. Maybe cause you wrote it wrong?"
+        if DataBase[self.year][self.period][self.typeOfChapter][self.numberOfChapter] == [0]*ChapterTypes[self.typeOfChapter]:
+            return "Please contact Forum managment, the chapter's answers ( q_a ) at DataBase is empty."
+        answer = {}
+        answer["checkedAnswers"] = {}
+        counterForCorrectAnswers = 0
+        for i in range(len(self.q_a)):
+            if self.q_a[i] == DataBase[self.year][self.period][self.typeOfChapter][self.numberOfChapter][i]:
+                counterForCorrectAnswers += 1
+                answer["checkedAnswers"][i] = ["V"]
+            else:
+                answer["checkedAnswers"][i] = ["X",DataBase[self.year][self.period][self.typeOfChapter][self.numberOfChapter][i]]
+        answer["numberOfCorrectAnswers"] = f"{counterForCorrectAnswers}/{ChapterTypes[self.typeOfChapter]}"
+        answer["successPercentage"] = f"{100*counterForCorrectAnswers/ChapterTypes[self.typeOfChapter]:.2f}%"
+        strTitle = f" Psychometry {self.typeOfChapter} chapter , Number: {self.numberOfChapter}, from the {self.period} {self.year} Edition: \nQuestions and Answers:\n"+"#"*60+"\n"
+        answer["__str__"] = {}
+        answer["__str__"]["with_out_acutal_correct_answers"] = strTitle
+        answer["__str__"]["with_actual_correct_answers"] = strTitle
+        answer["__str__"]["with_out_acutal_correct_answers"] += f"| Question number | Your answer's number | Is it correct? (V for yes, and X for no) |\n"
+        answer["__str__"]["with_actual_correct_answers"] += f"| Question number | Your answer's number | Is it correct? (V for yes, and X for no) | The actual correct answer's number (Filled only if you did a mistake!) |\n"
+        for i in range(len(self.q_a)):
+            answer["__str__"]["with_out_acutal_correct_answers"] += f"| {i+1} | {self.q_a[i]} | {answer['checkedAnswers'][i][0]} |\n"
+            tempStr = " "
+            if len(answer["checkedAnswers"][i])>1:
+                tempStr = answer["checkedAnswers"][i][1]
+            answer["__str__"]["with_actual_correct_answers"] += f"| {i+1} | {self.q_a[i]} | {answer['checkedAnswers'][i][0]} | {tempStr} |\n"
+        answer["__str__"]["with_out_acutal_correct_answers"] += "#"*60 +f"\nNumber of chapter's correct answers: {answer['numberOfCorrectAnswers']}.\nChapter's success percentage: {answer['successPercentage']}.\n"+"#"*60
+        answer["__str__"]["with_actual_correct_answers"] += "#"*60 +f"\nNumber of chapter's correct answers: {answer['numberOfCorrectAnswers']}.\nChapter's success percentage: {answer['successPercentage']}.\n"+"#"*60
 
-#class PsychoTest_test:
-#
-#    def __init__(self, nameOfTest):
-#        self.chapters  = {}
-#        self.nameOfTest = nameOfTest
-#        self.creationOfTestObject_DateTime = datetime.datetime.now()
-#    def addChapter(self,newChapter = PsychoTest_chapter()):
-#        if not isinstance(newChapter, PsychoTest_chapter):
-#            return "Not Added, you have not used an argument that is the correct type of Object or have entered None."
-#        if newChapter.is_q_a_Empty():
-#            newChapter.enterAnswers()
-#        if self.chapters != {}:
-#            for i in self.chapters:
-#                if newChapter.compareWith_q_a_excluded(i):
-#                    print(f"You have this chapter already in this Test, that named {self.nameOfTest}.")
-#                    if input("Would you liked to replace the previous chapter? Enter yes or no: ").lower() == "yes":
-#                        i.q_a = newChapter.q_a
-#                        return "Old Chapter was replaced."
-#                    elif input("Would you liked to modify the previous chapter's answers only? Enter yes or no: ").lower() == "yes":
-#                        i.modifyAnswers()
-#                        return "Old Chapter was modified."
-#                    return
-#        return
+        return answer
+
+
+
+
+
+
+
+class PsychoTest_test:
+
+    def __init__(self, nameOfTest):
+        self.chapters  = []
+        self.nameOfTest = nameOfTest
+        self.creationOfTestObject_DateTime = datetime.datetime.now()
+    def addChapter(self,newChapter):
+        if not isinstance(newChapter, PsychoTest_chapter):
+            return "Not Added, you have not used an argument that is the correct type of Object or have entered None."
+        if newChapter.is_q_a_Empty():
+            newChapter.enterAnswers()
+        if self.chapters != []:
+            for i in self.chapters:
+                if newChapter.compareWith_q_a_excluded(i):
+                    print(f"You have this chapter already in this Test, that named {self.nameOfTest}.")
+                    if input("Would you liked to replace the previous chapter? Enter yes or no: ").lower() == "yes":
+                        i.q_a = newChapter.q_a
+                        return "Old Chapter was replaced."
+                    elif input("Would you liked to modify the previous chapter's answers only? Enter yes or no: ").lower() == "yes":
+                        i.modifyAnswers()
+                        return "Old Chapter was modified."
+                    return "No changes."
+        self.chapters.append(newChapter)
+        return f"New chapter was added to {self.nameOfTest} test. The test which was created on {self.creationOfTestObject_DateTime}. "
+    
+                  
+        
                     
                         
 
