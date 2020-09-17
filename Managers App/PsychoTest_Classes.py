@@ -157,7 +157,7 @@ class PsychoTest_test:
             chapterAnalysis = i.checkAnswers(onlineDataBase)
             if isinstance(chapterAnalysis,dict) and (chapterAnalysis != {}):
                 print(chapterAnalysis["__str__"]["with_out_acutal_correct_answers"])
-                self.test_results[]
+                #self.test_results[]
 
     
                   
