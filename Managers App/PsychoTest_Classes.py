@@ -31,7 +31,7 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
             self.q_a[q-1]=a
         print("Finished modifying!")
     def __repr__(self): #Debuging form of repersantation of Chapter object
-        return f" Type:{self.typeOfChapter}, Num.{self.numberOfChapter}, Edition{self.period},{self.year} : \n { self.q_a } \n"
+        return f" Chapter:\n\tType: {self.typeOfChapter}\n\tNumber: {self.numberOfChapter}\n\tPeriod: {self.period}\n\tYear: {self.year}\n\t\tQ&A: { self.q_a }\n"
     def __str__(self): #User form of repersantation of Chapter object
         answer = f" Psychometry {self.typeOfChapter} chapter , Number: {self.numberOfChapter}, from the {self.period} {self.year} Edition: \nQuestions and Answers:\n"+"#"*40+"\n"
         
@@ -54,11 +54,11 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
 
         
 #    def reCreate(self,typeOfChapter,numberOfChapter,period,year,q_a): # Takes a given dictionary and create/restore an object by it. Restoring from seralization.
-#        answer =  cls(typeOfChapter,numberOfChapter,period,year)
+#        answer =  PsychoTest_chapter(typeOfChapter,numberOfChapter,period,year)
 #        answer.q_a = q_a
 #        return answer
     def compareWith_q_a_excluded(self, Chapter1): #When you want to check if an Chapter obj is the same of another, but not checking the q_a.
-        if (Chapter1 == None) or (not isinstance(Chapter1,cls)):
+        if (Chapter1 == None) or (not isinstance(Chapter1,PsychoTest_chapter)):
             return False
         return (self.typeOfChapter==Chapter1.typeOfChapter) and (self.numberOfChapter==Chapter1.numberOfChapter) and (self.period==Chapter1.period) and (self.year==Chapter1.year)
     def is_q_a_Empty(self): # Returns True if the answers of the chapter obj is empty or if the chapter is new. Else, of course returns False.
@@ -76,6 +76,12 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
             return "ID number of chapter isn't in DataBase. Maybe cause you wrote it wrong?"
         if DataBase[self.year][self.period][self.typeOfChapter][self.numberOfChapter] == [0]*ChapterTypes[self.typeOfChapter]:
             return "Please contact Forum managment, the chapter's answers ( q_a ) at DataBase is empty."
+        if self.is_q_a_Empty():
+            print("For some reason, the chapter is empty, meaning it doesn't have your answers filled.")
+            if input("Would you like to enter/reenter the answers? To do so write 'yes', else press any key. : ") == "yes":
+                self.enterAnswers()
+            else:
+                return "Tried to check an empty chapter."
         answer = {}
         answer["checkedAnswers"] = {}
         counterForCorrectAnswers = 0
@@ -104,6 +110,14 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
 
         return answer
 
+    def __eq__(self,otherChapter):
+        if not isinstance(otherChapter,PsychoTest_chapter):
+            return False
+        return self.compareWith_q_a_excluded(otherChapter) and (self.q_a == otherChapter.q_a)
+
+    def __hash__(self):
+        return hash((self.year,self.period,self.typeOfChapter,self.numberOfChapter,self.q_a))
+    #def fromUserDataBase(UserDataBase):
 
 
 
@@ -116,6 +130,7 @@ class PsychoTest_test:
         self.chapters  = []
         self.nameOfTest = nameOfTest
         self.creationOfTestObject_DateTime = datetime.datetime.now()
+        self.test_results = {}
     def addChapter(self,newChapter):
         if not isinstance(newChapter, PsychoTest_chapter):
             return "Not Added, you have not used an argument that is the correct type of Object or have entered None."
@@ -134,6 +149,16 @@ class PsychoTest_test:
                     return "No changes."
         self.chapters.append(newChapter)
         return f"New chapter was added to {self.nameOfTest} test. The test which was created on {self.creationOfTestObject_DateTime}. "
+    def check_test(self,onlineDataBase):
+        if self.chapters == []:
+            return "No chapters in this to check."
+        print(f"Checking Test named {self.nameOfTest}, that was created at {self.creationOfTestObject_DateTime}:")
+        for i in self.chapters:
+            chapterAnalysis = i.checkAnswers(onlineDataBase)
+            if isinstance(chapterAnalysis,dict) and (chapterAnalysis != {}):
+                print(chapterAnalysis["__str__"]["with_out_acutal_correct_answers"])
+                self.test_results[]
+
     
                   
         

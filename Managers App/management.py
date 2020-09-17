@@ -103,7 +103,7 @@ Let's get started!!!!
 
 print(Start_text)
 
-response = requests.get("https://raw.githubusercontent.com/FXP-Pscyhometery/final_answers_inventory/master/DataBase.json")
+response = requests.get("https://raw.githubusercontent.com/FXP-Pscyhometery/Psychomectry-Analysis-Documentation/master/DataBase.json")
 if response.status_code != 200:
     print("Failed to fetch the DataBase from it's online source. HTTP GET Request failed, not 200.")
     if input("Would you like to use a new/blank DataBase? Enter yes for yes, else any key to exit. : ") == "yes":

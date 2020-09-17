@@ -17,7 +17,7 @@ Credit to @gilbear and Psychometry forum managment!!
 """
 
 print(start_message)
-res = requests.get("https://raw.githubusercontent.com/FXP-Pscyhometery/final_answers_inventory/master/DataBase.json")
+res = requests.get("https://raw.githubusercontent.com/FXP-Pscyhometery/Psychomectry-Analysis-Documentation/master/DataBase.json")
 a = PsychoTest_Classes.PsychoTest_chapter("language","2","Summer","2020",[1]*23) #Example of chapter.
 print(a) 
 result = a.checkAnswers(res.json())
