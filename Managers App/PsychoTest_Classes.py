@@ -31,7 +31,7 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
             self.q_a[q-1]=a
         print("Finished modifying!")
     def __repr__(self): #Debuging form of repersantation of Chapter object
-        return f" Chapter:\n\tType: {self.typeOfChapter}\n\tNumber: {self.numberOfChapter}\n\tPeriod: {self.period}\n\tYear: {self.year}\n\t\tQ&A: { self.q_a }\n"
+        return { self.year: { self.period:{ self.typeOfChapter:{ self.numberOfChapter: self.q_a } } } }
     def __str__(self): #User form of repersantation of Chapter object
         answer = f" Psychometry {self.typeOfChapter} chapter , Number: {self.numberOfChapter}, from the {self.period} {self.year} Edition: \nQuestions and Answers:\n"+"#"*40+"\n"
         
@@ -114,10 +114,19 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
         if not isinstance(otherChapter,PsychoTest_chapter):
             return False
         return self.compareWith_q_a_excluded(otherChapter) and (self.q_a == otherChapter.q_a)
-
     def __hash__(self):
-        return hash((self.year,self.period,self.typeOfChapter,self.numberOfChapter,self.q_a))
-    #def fromUserDataBase(UserDataBase):
+        return hash((self.year,self.period,self.typeOfChapter,self.numberOfChapter,str(self.q_a)))
+    def addingToDataBase(self,DataBaseDict):#Transforms the object to Dict form and prepare it to be added. Only adds if not exist beforehand.
+        if not self.year in DataBaseDict:
+            DataBaseDict[self.year] = {}
+        if not self.period in DataBaseDict[self.year]:
+            DataBaseDict[self.year][self.period] = {}
+        if not self.typeOfChapter in DataBaseDict[self.year][self.period]:
+            DataBaseDict[self.year][self.period][self.typeOfChapter] = {}
+        if self.numberOfChapter in DataBaseDict[self.year][self.period][self.typeOfChapter]:
+            return False #Returns False if the chapter exists.
+        DataBaseDict[self.year][self.period][self.typeOfChapter][self.numberOfChapter] = self.q_a
+        return True #Return true if it added the chapter to DataBaseDict.
 
 
 
@@ -151,13 +160,28 @@ class PsychoTest_test:
         return f"New chapter was added to {self.nameOfTest} test. The test which was created on {self.creationOfTestObject_DateTime}. "
     def check_test(self,onlineDataBase):
         if self.chapters == []:
-            return "No chapters in this to check."
-        print(f"Checking Test named {self.nameOfTest}, that was created at {self.creationOfTestObject_DateTime}:")
+            return f"No chapters in this test that is named {self.nameOfTest}, and  that was created at {self.creationOfTestObject_DateTime} to check."
+        print(f"Checking Test that is named {self.nameOfTest}, and that was created at {self.creationOfTestObject_DateTime}:")
+        if self.test_results != {}:
+            for i in self.chapters:
+                print(self.test_results[i.year][i.period][i.typeOfChapter][i.numberOfChapter]["Result"]["__str__"]["with_out_acutal_correct_answers"])
+            if input("Would you like to see the actual correct answers? Enter 'yes' to do so, else press any key. : ") == "yes":
+                for i in self.chapters:
+                    print(self.test_results[i.year][i.period][i.typeOfChapter][i.numberOfChapter]["Result"]["__str__"]["with_acutal_correct_answers"])
+            return f"Finished checking the test that is named {self.nameOfTest}, and that was created at {self.creationOfTestObject_DateTime}. "
         for i in self.chapters:
             chapterAnalysis = i.checkAnswers(onlineDataBase)
             if isinstance(chapterAnalysis,dict) and (chapterAnalysis != {}):
                 print(chapterAnalysis["__str__"]["with_out_acutal_correct_answers"])
-                #self.test_results[]
+                if i.addingToDataBase(self.test_results):
+                    self.test_results[i.year][i.period][i.typeOfChapter][i.numberOfChapter] = {"q_a": i.q_a, "Result":chapterAnalysis}
+                else:
+                    print("Error: addingToDataBase() returned False, and test_result of {self.nameOfTest} is empty!!")
+        if input("Would you like to see the actual correct answers? Enter 'yes' to do so, else press any key. : ") == "yes":
+            for i in self.chapters:
+                print(self.test_results[i.year][i.period][i.typeOfChapter][i.numberOfChapter]["Result"]["__str__"]["with_acutal_correct_answers"])
+        return f"Finished checking the test that is named {self.nameOfTest}, and that was created at {self.creationOfTestObject_DateTime}. "
+
 
     
                   

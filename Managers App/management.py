@@ -25,16 +25,8 @@ def ADDmode(oldDataBase): # Function that collects information, answers, and any
         tempListOfChapters.append(tempChapter)
         inerState = input("Do you want to add another chapter? If yes enter 'yes', else press any key. : ")
     for i in tempListOfChapters:
-            if not i.year in oldDataBase.keys():
-                oldDataBase[i.year] = {}
-            if not i.period in oldDataBase[i.year].keys():
-                oldDataBase[i.year][i.period] = {}
-            if not i.typeOfChapter in oldDataBase[i.year][i.period].keys():
-                oldDataBase[i.year][i.period][i.typeOfChapter] = {}
-            if i.numberOfChapter in oldDataBase[i.year][i.period][i.typeOfChapter].keys():
-                print("This chapter already exist. Please go to MODIFY mode, to fix the wanted chapter answers in the database if needed.")
-            else:
-                oldDataBase[i.year][i.period][i.typeOfChapter][i.numberOfChapter] = i.q_a
+            if not i.addingToDataBase(oldDataBase):
+                print("This chapter already exist. Please go to MODIFY mode, to fix the wanted chapter answers in the database if needed.")        
     print("Finished adding the new chapters to the new DataBase. Exiting current mode...")
 
 def MODIFYmode(oldDataBase):
