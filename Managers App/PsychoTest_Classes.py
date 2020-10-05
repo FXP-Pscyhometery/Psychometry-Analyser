@@ -201,6 +201,35 @@ class PsychoTest_test:
         answer += "#"*30 +"\n"+"#"*60+"\n"
         return answer
         
+    def intoDataBase(DB):
+        if not isinstance(DB,dict):
+            return False #No action was taken since parameter isn't a dictionary, so returns false for no action happend.
+        if self.nameOfTest in DB:
+            print("You already have a test with the same name.")
+            if input("Do you wish to choose a different name for the new test? enter 'yes' to do so. : ")=="yes":
+                self.nameOfTest = input("Enter new name here : ")
+            elif input("Do you wish to add a new version with the same name, but different time of creation? enter 'yes' to do so. : ") == "yes":
+                DB[self.nameOfTest][str(self.creationOfTestObject_DateTime)] = self.test_results
+        DB[self.nameOfTest] = {str(self.creationOfTestObject_DateTime):self.test_results}
+        return True
+    @classmethod
+    def fromDataBase(cls,nameOfTest,creationOfTestObject_DateTime,DB):
+        if not isisinstance(DB,dict):
+            return False #No action was taken since parameter isn't a dictionary, so returns false for no action happend.
+        newTestObject = cls(nameOfTest)
+        newTestObject.creationOfTestObject_DateTime = creationOfTestObject_DateTime
+        newTestObject.test_results = DB[nameOfTest][creationOfTestObject_DateTime]
+        for year in newTestObject.test_results:
+            for period in newTestObject.test_results[year]:
+                for typeOfChapter in newTestObject.test_results[year][period]:
+                    for numberOfChapter in newTestObject.test_results[year][period][typeOfChapter]:
+                        newTestObject.chapters.append(PsychoTest_chapter(typeOfChapter,numberOfChapter,period,year,newTestObject.test_results[year][period][typeOfChapter][numberOfChapter]["q_a"]))
+
+        return newTestObject
+
+
+
+                
 
 
 
