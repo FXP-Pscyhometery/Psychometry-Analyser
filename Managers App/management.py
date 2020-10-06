@@ -1,5 +1,5 @@
 import json
-import PsychoTest_Classes
+from lib import PsychoTest_Classes
 import requests
 
 def ADDmode(oldDataBase): # Function that collects information, answers, and anything to create and add to the temporary DataBase.

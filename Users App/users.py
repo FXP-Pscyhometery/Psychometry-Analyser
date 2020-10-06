@@ -1,4 +1,4 @@
-import PsychoTest_Classes
+from lib import PsychoTest_Classes
 import requests
 import json
 import os
@@ -29,32 +29,76 @@ def startUp():
     Main_LocalDB = {}
     if Main_LocalDB_Path.exists():
         with Main_LocalDB_Path.open("r") as File:
-            Main_LocalDB = json.load(File)
+            try:
+                Main_LocalDB = json.load(File)
+            except JSONDecodeError as err:
+                print(f"ERROR: {err}")
+                print("Local database file exist.\nBut for some reason it's not a valid JSON document.\nPlease contact FXP Psychometry forum management for help.")
+                
     Databases["Main_LocalDB"] = Main_LocalDB
     Databases["onlineDB"] = onlineDataBase
     return Databases
 
 
 def ADDmode(Databases):
+    open_message = """
+
+    ##################################################################
+    ##################################################################
+
+    Welcome to 'Add new Test' option!
+    ---------------------------------
+
+    Here you will be able to upload a new test to the system.
+    Have it checked and analysed!
+    ##################################################################
+    
+    """
+    print(open_message)
+    if input("If you wish to return to the Main Menu, and not to continue in this option.\nEnter the digit 0 , else Enter any other key. : ") == "0":
+        return "CANCEL"
+    newTestObject = PsychoTest_Classes.PsychoTest_test(input("Enter a name of your choice for your test. : "))
+    print("\n"+"Next you will be adding new chapters to your test."+"\n"+"-"*30)
     inerState = "yes"
     while inerState == "yes":
-        print("New chapter:")
-        typeOfChapter = input("Enter the type of this chapter. Enter either 'language', 'math', or 'english'. Of course without any commas. : ")
-        numberOfChapter = input("Enter the number ID of the chapter, like in the pdf of the National Center, MALO. For example each published test/pdf, has in order, language 1 and language 2, math 1 and math 2, and english 1 and english 2. These 1 and 2's are the ID of the chapter. Just enter 1 or 2. : ")
-        periodOfChapter = input("Enter the period of the test/pdf, the chapter is from. For example, 'July', the month the test was, if it's from before 2018. Or enter the season, for examle, 'Winter', like in 'Winter 2019', just without the year please. : ")
+        print("\n"+"New chapter:"+"\n"+"-"*15)
+        typeOfChapter = input("Enter the type of this chapter.\nEnter either 'language', 'math', or 'english'. Of course without any commas. : ")
+        numberOfChapter = input("Enter the number ID of the chapter, like in the pdf of the National Center, MALO.\nFor example each published test/pdf, has in order, language 1 and language 2, math 1 and math 2, and english 1 and english 2.\nThese 1 and 2's are the ID of the chapter.\nJust enter 1 or 2. : ")
+        periodOfChapter = input("Enter the period of the test/pdf, the chapter is from.\nFor example, 'July', the month the test was, if it's from before 2018.\nOr enter the season, for examle, 'Winter', like in 'Winter 2019', just without the year please. : ")
         yearOfChapter = input("Enter the year of the test/pdf, the chapter is from : ")
         tempChapter = PsychoTest_Classes.PsychoTest_chapter(typeOfChapter, numberOfChapter, periodOfChapter, yearOfChapter)
         tempChapter.enterAnswers()
         print("This is the chapter you have entered: ")
         print(tempChapter)
-        finishedWithChapter = input("Are all the answers that had been entered are correct? If no enter 'no'. : ")
-        while finishedWithChapter == "no":
+        
+        while input("Are all the answers that had been entered are correct? If no enter 'no'. : ") == "no":
             tempChapter.modifyAnswers()
             print("This is the chapter you have entered: ")
             print(tempChapter)
-            finishedWithChapter = input("Are all the answers that had been entered are correct? If no enter 'no'. : ")
-        tempTest.addChapter(tempChapter)
-        inerState = input("Do you want to add another chapter? If yes enter 'yes', else press any key. : ")
+            
+        print(newTestObject.addChapter(tempChapter))
+        inerState = input("Do you want to add another chapter? If yes enter 'yes', else Enter any key. : ")
+    
+    print("\n"+"-"*30+"\n"+"Analysing test....."+"-"*15)
+    print(newTestObject.check_test(Databases["onlineDB"]))
+    print("#"*40)
+    print("Uploading test results and it's analysis to local database.")
+    if not newTestObject.intoDataBase(Databases["Main_LocalDB"]):
+        print("ERROR: In intoDataBase(), Local database in Databases isn't a Dictionary instance/type. ")
+        print("Please contact FXP Psychometry management.")
+    final_message = f"""
+#####################################################################################
+Finished and successfuly uploaded the test that was named {newTestObject.nameOfTest}.
+Which was created at {newTestObject.creationOfTestObject_DateTime}.
+#####################################################################################
+
+Returning to Main Menu.............
+#####################################################################################
+#####################################################################################
+
+"""
+    return final_message
+
 
 def VIEWmode(DataBases):
     print("VIEWmode(DataBases)")
@@ -161,7 +205,7 @@ while runMenu:
     print(Main_message)
     user_selected_this_option = input("Enter here the option you want to proceed with. Remember, enter the digit! : ")
     if user_selected_this_option == "1":
-        ADDmode(DataBases)
+        print(ADDmode(DataBases))
     elif user_selected_this_option == "2":
         VIEWmode(DataBases)
     elif user_selected_this_option == "3":
@@ -170,6 +214,7 @@ while runMenu:
         DELETEmode(DataBases)
     elif user_selected_this_option == "0":
         runMenu = False
+    time.sleep(2)
 
 exit_message = "#"*60+"\n"+"#"*60+"\n"+"""
 Existing the application.......
