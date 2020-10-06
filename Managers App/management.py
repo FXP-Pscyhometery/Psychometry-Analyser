@@ -7,10 +7,10 @@ def ADDmode(oldDataBase): # Function that collects information, answers, and any
     inerState = "yes"
     tempListOfChapters = []
     while inerState == "yes":
-        print("New chapter:")
-        typeOfChapter = input("Enter the type of this chapter. Enter either 'language', 'math', or 'english'. Of course without any commas. : ")
-        numberOfChapter = input("Enter the number ID of the chapter, like in the pdf of the National Center, MALO. For example each published test/pdf, has in order, language 1 and language 2, math 1 and math 2, and english 1 and english 2. These 1 and 2's are the ID of the chapter. Just enter 1 or 2. : ")
-        periodOfChapter = input("Enter the period of the test/pdf, the chapter is from. For example, 'July', the month the test was, if it's from before 2018. Or enter the season, for examle, 'Winter', like in 'Winter 2019', just without the year please. : ")
+        print("\n"+"New chapter:"+"\n"+"-"*15)
+        typeOfChapter = input("Enter the type of this chapter.\nEnter either 'language', 'math', or 'english'. Of course without any commas. : ")
+        numberOfChapter = input("Enter the number ID of the chapter, like in the pdf of the National Center, MALO.\nFor example each published test/pdf, has in order, language 1 and language 2, math 1 and math 2, and english 1 and english 2.\nThese 1 and 2's are the ID of the chapter.\nJust enter 1 or 2. : ")
+        periodOfChapter = input("Enter the period of the test/pdf, the chapter is from.\nFor example, 'July', the month the test was, if it's from before 2018.\nOr enter the season, for examle, 'Winter', like in 'Winter 2019', just without the year please. : ")
         yearOfChapter = input("Enter the year of the test/pdf, the chapter is from : ")
         tempChapter = PsychoTest_Classes.PsychoTest_chapter(typeOfChapter, numberOfChapter, periodOfChapter, yearOfChapter)
         tempChapter.enterAnswers()
