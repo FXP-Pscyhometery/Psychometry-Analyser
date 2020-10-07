@@ -161,7 +161,7 @@ class PsychoTest_test:
     def __init__(self, nameOfTest):
         self.chapters  = []
         self.nameOfTest = nameOfTest
-        self.creationOfTestObject_DateTime = datetime.datetime.now()
+        self.creationOfTestObject_DateTime = str(datetime.datetime.now())
         self.test_results = {}
     def addChapter(self,newChapter):
         if not isinstance(newChapter, PsychoTest_chapter):

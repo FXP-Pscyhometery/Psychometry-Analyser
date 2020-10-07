@@ -5,9 +5,9 @@ import os
 from pathlib import Path
 import time
 import datetime
-
+from json.decoder import JSONDecodeError
 def createLocalDBFolder():#Creates on call home folder and path object of it ,in this folder all data is been stored.
-    LocalDBFolder = Path("LocalDB")#Path object , for cross-platform directory path handling.
+    LocalDBFolder = Path.home() / Path("LocalDB")#Path object , for cross-platform directory path handling.
     LocalDBFolder.mkdir(exist_ok=True) #Creates the Folder,if folder exists it will ignore the exception and will do nothing.
     return LocalDBFolder # Returns Home Folder Path object .
 
@@ -35,7 +35,7 @@ def startUp():
     LocalDBFolder = createLocalDBFolder()
     Main_LocalDB_Path = LocalDBFolder / "main.json"
     Main_LocalDB = {}
-    if Main_LocalDB_Path.exists():
+    if Main_LocalDB_Path.exists() and Main_LocalDB_Path.is_file() and Main_LocalDB_Path.stat().st_size > 0:
         with Main_LocalDB_Path.open("r") as File:
             try:
                 Main_LocalDB = json.load(File)
@@ -45,7 +45,16 @@ def startUp():
                 
     Databases["Main_LocalDB"] = Main_LocalDB
     Databases["onlineDB"] = onlineDataBase
-    return Databases
+    return Databases,Main_LocalDB_Path
+
+def shotdown(Main_LocalDB,Main_LocalDB_Path):
+    try:
+        with Main_LocalDB_Path.open("w") as Main_LocalDB_File:
+            json.dump(Main_LocalDB, Main_LocalDB_File, indent=4)
+            return "Successfully saved local database to file."
+    except:
+        print("ERROR: shotdown raised an error!!!\nFailed to save LocalDB to file!!!\nPLEASE CONTACT IMMEDIATELY FXP PSYCHOMETRY MANAGEMENT!!!")
+        return "FAILED SAVING LOCAL DATABASE TO FILE!"
 
 
 def ADDmode(Databases):
@@ -156,19 +165,16 @@ def VIEWmode(DataBases):
     dictOfReleaventOfTests = {}
     for nameOfTest in DataBases["Main_LocalDB"]:
         for datetime_index in DataBases["Main_LocalDB"][nameOfTest]:
-            if start_timeSpan <= datetime_index <= end_timeSpan:
+            datetime_index_as_datetime_object = datetime.datetime.fromisoformat(datetime_index)
+            if start_timeSpan <= datetime_index_as_datetime_object <= end_timeSpan:
                 dictOfReleaventOfTests[datetime_index] = PsychoTest_Classes.PsychoTest_test.fromDataBase(nameOfTest,datetime_index,DataBases["Main_LocalDB"])
     numberOfTests = len(dictOfReleaventOfTests)
     numberOfChaptersByType = {"language":0,"math":0,"english":0}
     sumOfCorrectAnswersOfChaptersByType = {"language":0,"math":0,"english":0}
     for timeIndex in dictOfReleaventOfTests:
         for chapter in dictOfReleaventOfTests[timeIndex].chapters:
-            print("imHERE")
             numberOfChaptersByType[chapter.typeOfChapter] += 1
-            print(numberOfChaptersByType[chapter.typeOfChapter])
             sumOfCorrectAnswersOfChaptersByType[chapter.typeOfChapter] += int(dictOfReleaventOfTests[timeIndex].test_results[chapter.year][chapter.period][chapter.typeOfChapter][chapter.numberOfChapter]["Result"]["numberOfCorrectAnswers"].split("/")[0])
-            print(dictOfReleaventOfTests[timeIndex].test_results[chapter.year][chapter.period][chapter.typeOfChapter][chapter.numberOfChapter]["Result"]["numberOfCorrectAnswers"].split("/"))
-            print(sumOfCorrectAnswersOfChaptersByType[chapter.typeOfChapter])
     time.sleep(2)
     firstAnalysis = f"""
      ####################################################################
@@ -179,7 +185,6 @@ def VIEWmode(DataBases):
      
 
      """
-    print(numberOfChaptersByType,sumOfCorrectAnswersOfChaptersByType)
     for TYPE in numberOfChaptersByType:
         if numberOfChaptersByType[TYPE] < 1:
             firstAnalysis += f"""
@@ -217,7 +222,6 @@ def VIEWmode(DataBases):
                 print("\n"+"-"*30)
             print("#"*30+"\n")
             time.sleep(3)
-    time.sleep(10)
     final_message = f"""
 #####################################################################################
 #####################################################################################
@@ -259,7 +263,8 @@ print(PsychoTest_Classes.logo)
 time.sleep(1)
 print(start_message)
 time.sleep(2.5)
-DataBases = startUp()
+DataBases,Main_LocalDB_Path = startUp()
+
 if DataBases == "EXIT":
     exit()
 Main_message = """
@@ -318,7 +323,7 @@ while runMenu:
     if user_selected_this_option == "1":
         print(ADDmode(DataBases))
     elif user_selected_this_option == "2":
-        VIEWmode(DataBases)
+        print(VIEWmode(DataBases))
     elif user_selected_this_option == "3":
         MANAGEmode(DataBases)
     elif user_selected_this_option == "4":
@@ -326,7 +331,7 @@ while runMenu:
     elif user_selected_this_option == "0":
         runMenu = False
     time.sleep(2)
-
+print("#"*60+"\n"+"#"*60+"\n"+shotdown(DataBases["Main_LocalDB"],Main_LocalDB_Path)+"\n"+"#"*60+"\n"+"#"*60+"\n")
 exit_message = "#"*60+"\n"+"#"*60+"\n"+"""
 Existing the application.......
 Good Bye and thanks for using the application.
