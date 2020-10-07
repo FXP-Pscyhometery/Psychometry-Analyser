@@ -1,8 +1,31 @@
+#Library for Psychometry Automated Analysis
+#Made by @gilbear and @gilkzxc
+
+
 import datetime
 import statistics
 
 ChapterTypes = { "language": 23,"math": 20,"english": 22 } # a dictionary to set the diffrent types of Psychometry chapters
 
+logo = """
+                                                                                                                                                                                                        
+                                                                                                                                                                                                        
+                                                                                                                                                                                                        
+ .mmmmmmd/.hmm+   +mms `dmmmmdhs-       -mmmmmdho`  -sdmNNmd`:dmd`   ymd-  -sdmNNmd` +md/    `mmh    :sdNNNdy/    ymmmy     :mmmd.  ymmmmmdy hmdmmmmmmd+ ommmdddy+` smds   .dmh`             
+ .MMm////. .mMM/ oMMs  `MMN:/oNMM:      :MMh:/sMMN.:MMm/--/o` +MMd` sMM/ .dMMh+///o` oMM+    `MMN  `dMMh+//yMMm.  mMNMM+   `NMNMM.  mMM+///: ://oMMm///- yMMo:/hMMh  hMM+ `mMm.              
+ .MMd       `hMMyMM+   `MMm   yMM+      :MMy  `NMM-:MMNs:`     +MMyoMM/  dMM+        oMMs::::/MMN  hMMo     oMMh  mMdyMN.  yMhdMM.  mMM-...`    -MMd     yMM:  oMMy  `hMM/dMm.               
+ .MMMMMMM    `NMMMs    `MMMhhmMMy`      :MMmhhNMN+  -smMMMd+    +MMMM/  `MMM`        oMMMMMMMMMMN  NMM-     -MMN  mMd`mMd /MN`dMM.  mMMMMMM+    -MMd     yMMNmNMh/    `hMMMm`                
+ .MMd....   -mMmsMMs   `MMN++/:`        :MMd++/-       `:mMMo    yMMo    mMMo        oMM+    `MMN  hMMs     sMMy  mMd -MMsNM: dMM.  mMM.        -MMd     yMMo:hMNo     `NMM.                 
+ .MMd      /MMm. +MMd` `MMm             :MMy       /ho//+mMM/    sMM+    -mMMmsoosd. oMM+    `MMN  `hMMdsosdMMy`  mMd  oMMMs  dMM.  mMMsoooo    -MMd     yMM:  oMMh.    NMM`                 
+ .hho     :hhy`   /hhs``yhs             -hh+       -shdddho-     /hh:      :shdddhs` /hh:    `hhy    -oydddy+.    shs   shy`  ohh.  shhhhhhy`   .hhs     +hh-   :hhs`   yhy`                 
+://////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-             
+.------------------------------------------------------------------------------------------------------------------------------------------------------------------------------`             
+                                                                                                                                                                                                        
+                                                                                                                                                                                                        
+                                                                                                                                                                                                        
+                                                                                                                                                                                                        
+                                                                                                                                                                
+"""
 
 class PsychoTest_chapter: #A class for a psychometry generic-type chapter
     
@@ -95,17 +118,17 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
         answer["successPercentage"] = f"{100*counterForCorrectAnswers/ChapterTypes[self.typeOfChapter]:.2f}%"
         strTitle = f" Psychometry {self.typeOfChapter} chapter , Number: {self.numberOfChapter}, from the {self.period} {self.year} Edition: \nQuestions and Answers:\n"+"#"*60+"\n"
         answer["__str__"] = {}
-        answer["__str__"]["with_out_acutal_correct_answers"] = strTitle
+        answer["__str__"]["with_out_actual_correct_answers"] = strTitle
         answer["__str__"]["with_actual_correct_answers"] = strTitle
-        answer["__str__"]["with_out_acutal_correct_answers"] += f"| Question number | Your answer's number | Is it correct? (V for yes, and X for no) |\n"
+        answer["__str__"]["with_out_actual_correct_answers"] += f"| Question number | Your answer's number | Is it correct? (V for yes, and X for no) |\n"
         answer["__str__"]["with_actual_correct_answers"] += f"| Question number | Your answer's number | Is it correct? (V for yes, and X for no) | The actual correct answer's number (Filled only if you did a mistake!) |\n"
         for i in range(len(self.q_a)):
-            answer["__str__"]["with_out_acutal_correct_answers"] += f"| {i+1} | {self.q_a[i]} | {answer['checkedAnswers'][i][0]} |\n"
+            answer["__str__"]["with_out_actual_correct_answers"] += f"| {i+1} | {self.q_a[i]} | {answer['checkedAnswers'][i][0]} |\n"
             tempStr = " "
             if len(answer["checkedAnswers"][i])>1:
                 tempStr = answer["checkedAnswers"][i][1]
             answer["__str__"]["with_actual_correct_answers"] += f"| {i+1} | {self.q_a[i]} | {answer['checkedAnswers'][i][0]} | {tempStr} |\n"
-        answer["__str__"]["with_out_acutal_correct_answers"] += "#"*60 +f"\nNumber of chapter's correct answers: {answer['numberOfCorrectAnswers']}.\nChapter's success percentage: {answer['successPercentage']}.\n"+"#"*60
+        answer["__str__"]["with_out_actual_correct_answers"] += "#"*60 +f"\nNumber of chapter's correct answers: {answer['numberOfCorrectAnswers']}.\nChapter's success percentage: {answer['successPercentage']}.\n"+"#"*60
         answer["__str__"]["with_actual_correct_answers"] += "#"*60 +f"\nNumber of chapter's correct answers: {answer['numberOfCorrectAnswers']}.\nChapter's success percentage: {answer['successPercentage']}.\n"+"#"*60
 
         return answer
@@ -164,15 +187,15 @@ class PsychoTest_test:
         print(f"Checking Test that is named {self.nameOfTest}, and that was created at {self.creationOfTestObject_DateTime}:")
         if self.test_results != {}:
             for i in self.chapters:
-                print(self.test_results[i.year][i.period][i.typeOfChapter][i.numberOfChapter]["Result"]["__str__"]["with_out_acutal_correct_answers"])
+                print(self.test_results[i.year][i.period][i.typeOfChapter][i.numberOfChapter]["Result"]["__str__"]["with_out_actual_correct_answers"])
             if input("Would you like to see the actual correct answers? Enter 'yes' to do so, else press any key. : ") == "yes":
                 for i in self.chapters:
-                    print(self.test_results[i.year][i.period][i.typeOfChapter][i.numberOfChapter]["Result"]["__str__"]["with_acutal_correct_answers"])
+                    print(self.test_results[i.year][i.period][i.typeOfChapter][i.numberOfChapter]["Result"]["__str__"]["with_actual_correct_answers"])
             return f"Finished checking the test that is named {self.nameOfTest}, and that was created at {self.creationOfTestObject_DateTime}. "
         for i in self.chapters:
             chapterAnalysis = i.checkAnswers(onlineDataBase)
             if isinstance(chapterAnalysis,dict) and (chapterAnalysis != {}):
-                print(chapterAnalysis["__str__"]["with_out_acutal_correct_answers"])
+                print(chapterAnalysis["__str__"]["with_out_actual_correct_answers"])
                 if i.addingToDataBase(self.test_results):
                     self.test_results[i.year][i.period][i.typeOfChapter][i.numberOfChapter] = {"q_a": i.q_a, "Result":chapterAnalysis}
                 else:
@@ -201,7 +224,7 @@ class PsychoTest_test:
         answer += "#"*30 +"\n"+"#"*60+"\n"
         return answer
         
-    def intoDataBase(DB):
+    def intoDataBase(self,DB):
         if not isinstance(DB,dict):
             return False #No action was taken since parameter isn't a dictionary, so returns false for no action happend.
         if self.nameOfTest in DB:
@@ -209,12 +232,12 @@ class PsychoTest_test:
             if input("Do you wish to choose a different name for the new test? enter 'yes' to do so. : ")=="yes":
                 self.nameOfTest = input("Enter new name here : ")
             elif input("Do you wish to add a new version with the same name, but different time of creation? enter 'yes' to do so. : ") == "yes":
-                DB[self.nameOfTest][str(self.creationOfTestObject_DateTime)] = self.test_results
-        DB[self.nameOfTest] = {str(self.creationOfTestObject_DateTime):self.test_results}
+                DB[self.nameOfTest][self.creationOfTestObject_DateTime] = self.test_results
+        DB[self.nameOfTest] = {self.creationOfTestObject_DateTime:self.test_results}
         return True
     @classmethod
     def fromDataBase(cls,nameOfTest,creationOfTestObject_DateTime,DB):
-        if not isisinstance(DB,dict):
+        if not isinstance(DB,dict):
             return False #No action was taken since parameter isn't a dictionary, so returns false for no action happend.
         newTestObject = cls(nameOfTest)
         newTestObject.creationOfTestObject_DateTime = creationOfTestObject_DateTime

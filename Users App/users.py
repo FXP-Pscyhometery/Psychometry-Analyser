@@ -1,14 +1,22 @@
-from lib import PsychoTest_Classes
+from PsychoTest_Classes import PsychoTest_Classes
 import requests
 import json
 import os
 from pathlib import Path
 import time
+import datetime
 
 def createLocalDBFolder():#Creates on call home folder and path object of it ,in this folder all data is been stored.
     LocalDBFolder = Path("LocalDB")#Path object , for cross-platform directory path handling.
     LocalDBFolder.mkdir(exist_ok=True) #Creates the Folder,if folder exists it will ignore the exception and will do nothing.
     return LocalDBFolder # Returns Home Folder Path object .
+
+def dateHandler():
+    tempDate = datetime.datetime(int(input("\nEnter the year : ")),int(input("\nEnter the month : ")),int(input("\nEnter the day : ")))
+    print("This the date you have entered : ",str(tempDate))
+    if input("Is it the correct ? If no enter 'no', else enter any key. : ") == "no":
+        return dateHandler()
+    return tempDate
 
 def startUp():
     Databases = {}
@@ -79,7 +87,7 @@ def ADDmode(Databases):
         print(newTestObject.addChapter(tempChapter))
         inerState = input("Do you want to add another chapter? If yes enter 'yes', else Enter any key. : ")
     
-    print("\n"+"-"*30+"\n"+"Analysing test....."+"-"*15)
+    print("\n"+"-"*30+"\n"+"Analysing test....."+"\n"+"-"*15)
     print(newTestObject.check_test(Databases["onlineDB"]))
     print("#"*40)
     print("Uploading test results and it's analysis to local database.")
@@ -101,7 +109,128 @@ Returning to Main Menu.............
 
 
 def VIEWmode(DataBases):
-    print("VIEWmode(DataBases)")
+    open_message = """
+
+    ##################################################################
+    ##################################################################
+
+    Welcome to 'View Statistics and Documentations' option!
+    ---------------------------------
+
+    Here you will be able to view all the statistics and documentations on
+    test you have enterd into the system till now.
+    ##################################################################
+    
+    """
+    print(open_message)
+    if (not isinstance(DataBases,dict)) or (not isinstance(DataBases["Main_LocalDB"],dict)):
+        print("ERROR:DataBases or Local database in Databases isn't a Dictionary instance/type. ")
+        print("Please contact FXP Psychometry management.")
+        return "CANCEL"
+    if DataBases["Main_LocalDB"] == {}:
+        print("You have 0 tests in the local database, therefore you are being returned to the main menu.")
+        return "CANCEL"
+    if input("If you wish to return to the Main Menu, and not to continue in this option.\nEnter the digit 0 , else Enter any other key. : ") == "0":
+        return "CANCEL"
+    view_mode_firstMenu = """
+    _______________________________________________________________
+    You can calculate statistics and view of different time spans.
+    You would be able to choose from when it's releavent for you.
+    And untill when it's releavent for you.
+    ---------------------------------------------------------------
+
+    The dates you would be asked to enter would be in numbers.
+    For example:
+    1/1/2020
+    
+
+    """
+    print(view_mode_firstMenu)
+    print("Now enter the date of from when it's releavent for you. :\n")
+    start_timeSpan = dateHandler()
+    print("Now enter the date of untill when it's releavent for you. :\n")
+    if input("Would you like it to be untill now, in time also?\nFor example if you had enterd a test today, and you wanted it to be included.\nEnter 'yes' for untill now, in date and time, else enter any key. : ") == "yes":
+        end_timeSpan = datetime.datetime.now()
+    else:
+        end_timeSpan = dateHandler()
+    dictOfReleaventOfTests = {}
+    for nameOfTest in DataBases["Main_LocalDB"]:
+        for datetime_index in DataBases["Main_LocalDB"][nameOfTest]:
+            if start_timeSpan <= datetime_index <= end_timeSpan:
+                dictOfReleaventOfTests[datetime_index] = PsychoTest_Classes.PsychoTest_test.fromDataBase(nameOfTest,datetime_index,DataBases["Main_LocalDB"])
+    numberOfTests = len(dictOfReleaventOfTests)
+    numberOfChaptersByType = {"language":0,"math":0,"english":0}
+    sumOfCorrectAnswersOfChaptersByType = {"language":0,"math":0,"english":0}
+    for timeIndex in dictOfReleaventOfTests:
+        for chapter in dictOfReleaventOfTests[timeIndex].chapters:
+            print("imHERE")
+            numberOfChaptersByType[chapter.typeOfChapter] += 1
+            print(numberOfChaptersByType[chapter.typeOfChapter])
+            sumOfCorrectAnswersOfChaptersByType[chapter.typeOfChapter] += int(dictOfReleaventOfTests[timeIndex].test_results[chapter.year][chapter.period][chapter.typeOfChapter][chapter.numberOfChapter]["Result"]["numberOfCorrectAnswers"].split("/")[0])
+            print(dictOfReleaventOfTests[timeIndex].test_results[chapter.year][chapter.period][chapter.typeOfChapter][chapter.numberOfChapter]["Result"]["numberOfCorrectAnswers"].split("/"))
+            print(sumOfCorrectAnswersOfChaptersByType[chapter.typeOfChapter])
+    time.sleep(2)
+    firstAnalysis = f"""
+     ####################################################################
+     First Analysis:
+     ---------------
+     Number of tests in this analysis: {numberOfTests}
+     ---------------------------------------------------
+     
+
+     """
+    print(numberOfChaptersByType,sumOfCorrectAnswersOfChaptersByType)
+    for TYPE in numberOfChaptersByType:
+        if numberOfChaptersByType[TYPE] < 1:
+            firstAnalysis += f"""
+     {TYPE}:
+     ---------
+
+     Number of {TYPE} chapters: {numberOfChaptersByType[TYPE]}
+     
+     Average {TYPE} chapter preformance: 0 / {PsychoTest_Classes.ChapterTypes[TYPE]}
+     Average {TYPE} chapter success rate: 0%
+     -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+     """
+        else:
+            firstAnalysis += f"""
+     {TYPE}:
+     ---------
+
+     Number of {TYPE} chapters: {numberOfChaptersByType[TYPE]}
+     
+     Average {TYPE} chapter preformance: {sumOfCorrectAnswersOfChaptersByType[TYPE]/numberOfChaptersByType[TYPE]} / {PsychoTest_Classes.ChapterTypes[TYPE]}
+     Average {TYPE} chapter success rate: {100*(sumOfCorrectAnswersOfChaptersByType[TYPE]/numberOfChaptersByType[TYPE]) / PsychoTest_Classes.ChapterTypes[TYPE]:.2f}%
+     -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+     """
+    print(firstAnalysis+"\n"+"#"*30)
+    time.sleep(2)
+    if input("Would you like to see brief of the preformance for each test?\nEnter 'yes' to do so, else enter any key. : ") == "yes":
+        print("#"*30+"\n")
+        for timeIndex in sorted(dictOfReleaventOfTests.keys()):
+            print(dictOfReleaventOfTests[timeIndex])
+            if input("Would you like to see full analysis of test?\nEnter 'yes' to do so, else enter any key. : ") == "yes":
+                print("\n"+"-"*30)
+                print(dictOfReleaventOfTests[timeIndex].check_test(DataBases["onlineDB"]))
+                print("\n"+"-"*30)
+            print("#"*30+"\n")
+            time.sleep(3)
+    time.sleep(10)
+    final_message = f"""
+#####################################################################################
+#####################################################################################
+
+Returning to Main Menu.............
+#####################################################################################
+#####################################################################################
+
+"""
+    return final_message
+
+
+
 
 def MANAGEmode(DataBases):
     print("MANAGEmode(DataBases)")
@@ -110,25 +239,7 @@ def DELETEmode(DataBases):
     print("DELETEmode(DataBases)")
 
 
-logo = """
-                                                                                                                                                                                                        
-                                                                                                                                                                                                        
-                                                                                                                                                                                                        
- .mmmmmmd/.hmm+   +mms `dmmmmdhs-       -mmmmmdho`  -sdmNNmd`:dmd`   ymd-  -sdmNNmd` +md/    `mmh    :sdNNNdy/    ymmmy     :mmmd.  ymmmmmdy hmdmmmmmmd+ ommmdddy+` smds   .dmh`             
- .MMm////. .mMM/ oMMs  `MMN:/oNMM:      :MMh:/sMMN.:MMm/--/o` +MMd` sMM/ .dMMh+///o` oMM+    `MMN  `dMMh+//yMMm.  mMNMM+   `NMNMM.  mMM+///: ://oMMm///- yMMo:/hMMh  hMM+ `mMm.              
- .MMd       `hMMyMM+   `MMm   yMM+      :MMy  `NMM-:MMNs:`     +MMyoMM/  dMM+        oMMs::::/MMN  hMMo     oMMh  mMdyMN.  yMhdMM.  mMM-...`    -MMd     yMM:  oMMy  `hMM/dMm.               
- .MMMMMMM    `NMMMs    `MMMhhmMMy`      :MMmhhNMN+  -smMMMd+    +MMMM/  `MMM`        oMMMMMMMMMMN  NMM-     -MMN  mMd`mMd /MN`dMM.  mMMMMMM+    -MMd     yMMNmNMh/    `hMMMm`                
- .MMd....   -mMmsMMs   `MMN++/:`        :MMd++/-       `:mMMo    yMMo    mMMo        oMM+    `MMN  hMMs     sMMy  mMd -MMsNM: dMM.  mMM.        -MMd     yMMo:hMNo     `NMM.                 
- .MMd      /MMm. +MMd` `MMm             :MMy       /ho//+mMM/    sMM+    -mMMmsoosd. oMM+    `MMN  `hMMdsosdMMy`  mMd  oMMMs  dMM.  mMMsoooo    -MMd     yMM:  oMMh.    NMM`                 
- .hho     :hhy`   /hhs``yhs             -hh+       -shdddho-     /hh:      :shdddhs` /hh:    `hhy    -oydddy+.    shs   shy`  ohh.  shhhhhhy`   .hhs     +hh-   :hhs`   yhy`                 
-://////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-             
-.------------------------------------------------------------------------------------------------------------------------------------------------------------------------------`             
-                                                                                                                                                                                                        
-                                                                                                                                                                                                        
-                                                                                                                                                                                                        
-                                                                                                                                                                                                        
-                                                                                                                                                                
-"""
+
 start_message = """
 #####################################################################
 
@@ -144,7 +255,7 @@ Credit to @gilbear and Psychometry forum managment!!
 """
 print("Please change to maximum window")
 time.sleep(4)
-print(logo)
+print(PsychoTest_Classes.logo)
 time.sleep(1)
 print(start_message)
 time.sleep(2.5)
@@ -168,7 +279,7 @@ MAIN MENU:
        #
        #
        #
-       2) See Statistics and Documentations of tests in your Local database.
+       2) View Statistics and Documentations of tests in your Local database.
           -----------------------------------------------
           (This option will transfer you to the statitics, documentations and results of all the tests you have enterd here before.)
           -----------------------------------------------------------------------------------------------------------------
@@ -220,10 +331,11 @@ exit_message = "#"*60+"\n"+"#"*60+"\n"+"""
 Existing the application.......
 Good Bye and thanks for using the application.
 *Credit to @gilbear and FXP Psychometry managment.*
-"""
+
+"""+"#"*60+"\n"+"#"*60+"\n"
 
 print(exit_message)
-print(logo)
+print(PsychoTest_Classes.logo)
 
 input("Press any key to exit and close window ...")
 

@@ -1,5 +1,6 @@
 import json
-from lib import PsychoTest_Classes
+import time
+from PsychoTest_Classes import PsychoTest_Classes
 import requests
 
 def ADDmode(oldDataBase): # Function that collects information, answers, and anything to create and add to the temporary DataBase.
@@ -79,7 +80,7 @@ def DELETmode(oldDataBase):
     print("Finished Deleting the tests and chaptes, being updated to the new DataBase. Exiting current mode...")
 
 
-Start_text = """
+start_message = """
 Welcome to management app! Credit to @gilbear
 #############################################
 
@@ -93,7 +94,13 @@ Let's get started!!!!
 
 """
 
-print(Start_text)
+print("Please change to maximum window")
+time.sleep(4)
+print(PsychoTest_Classes.logo)
+time.sleep(1)
+print(start_message)
+time.sleep(2.5)
+
 
 response = requests.get("https://raw.githubusercontent.com/FXP-Pscyhometery/Psychomectry-Analysis-Documentation/master/DataBase.json")
 if response.status_code != 200:
@@ -151,7 +158,8 @@ Don't know how? ask @gilbear or your supervisor or other managers, or read again
 Exit!
 ###############################################################################################
 """
-exitV = input("press any key to exit: ")
+print(PsychoTest_Classes.logo)
+input("press any key to exit: ")
 
 
             
