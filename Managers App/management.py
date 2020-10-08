@@ -2,7 +2,8 @@ import json
 import time
 from PsychoTest_Classes import PsychoTest_Classes
 import requests
-
+import os
+os.system("title Psychometry Analyser - Management")
 def ADDmode(oldDataBase): # Function that collects information, answers, and anything to create and add to the temporary DataBase.
     print("Welcome to ADD mode! For each chapter, you will be asked to enter releavent data.")
     inerState = "yes"

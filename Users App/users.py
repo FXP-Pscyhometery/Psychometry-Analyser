@@ -6,6 +6,8 @@ from pathlib import Path
 import time
 import datetime
 from json.decoder import JSONDecodeError
+
+os.system("title Psychometry Analyser")
 def createLocalDBFolder():#Creates on call home folder and path object of it ,in this folder all data is been stored.
     LocalDBFolder = Path.home() / Path("LocalDB")#Path object , for cross-platform directory path handling.
     LocalDBFolder.mkdir(exist_ok=True) #Creates the Folder,if folder exists it will ignore the exception and will do nothing.
