@@ -270,11 +270,12 @@ Returning to Main Menu.............
     datetimeIndexies = {"language":[],"math":[],"english":[]}
     for timeIndex in sorted(dictOfReleaventOfTests.keys()):
         tempSum = {"language":0,"math":0,"english":0}
+        tempNumberOfChaptersByType = {"language":0,"math":0,"english":0}
         for chapter in dictOfReleaventOfTests[timeIndex].chapters:
-            numberOfChaptersByType[chapter.typeOfChapter] += 1
+            tempNumberOfChaptersByType[chapter.typeOfChapter] +=1
             tempSum[chapter.typeOfChapter] += int(dictOfReleaventOfTests[timeIndex].test_results[chapter.year][chapter.period][chapter.typeOfChapter][chapter.numberOfChapter]["Result"]["numberOfCorrectAnswers"].split("/")[0])
         for Type in ["language","math","english"]:
-            if tempSum[Type]>0:
+            if tempNumberOfChaptersByType[Type]>0 and tempSum[Type]>0:
                 tempNameOfTest = dictOfReleaventOfTests[timeIndex].nameOfTest
                 if not tempNameOfTest in testWithSameName[Type]:
                     testWithSameName[Type][tempNameOfTest] = 1
@@ -282,8 +283,9 @@ Returning to Main Menu.............
                     testWithSameName[Type][tempNameOfTest] += 1
                 preformanceInTypeByName_and_Date_x[Type].append(tempNameOfTest+f"-{testWithSameName[Type][tempNameOfTest]}")
                 datetimeIndexies[Type].append(timeIndex)
-                preformanceInTypeByName_and_Date_y[Type].append(tempSum[Type])
+                preformanceInTypeByName_and_Date_y[Type].append(tempSum[Type]/tempNumberOfChaptersByType[Type])
                 sumOfCorrectAnswersOfChaptersByType[Type] += tempSum[Type]
+                numberOfChaptersByType[chapter.typeOfChapter] += tempNumberOfChaptersByType[Type]
 
     time.sleep(2)
     firstAnalysis = f"""
@@ -324,20 +326,29 @@ Returning to Main Menu.............
     time.sleep(2)
     print("""
 
-    ------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------------------------------------------------------------------
     Will now open graphs of preformance over time for each type of chapters.
     The graph will help you understand if you are imporving or not over time.
     They will open in you default web browser in a new tab.
     Don't worry the program will wait for you ( you will see :) ).
-    It 
-    ------------------------------------------------------------------------------
+    It will show you a graph of average of (correct answers in chapter)/(maximum correct answers in chapter) per test for each type of chapters.
+    For example, if you have done a test with two math types chapters, and in one 10 correct answers out of 20,
+    and in the other, 12 correct answers out of 20, then you will see the average for it:
+    11 for the y-value in the graph (height) and 'Average: 11/20' if you hover with your mouse on each bar.
+    
+    each test will appear like this on the x axis : "name-k" ,
+    when k is the number for cases like if you have more than one tests with the same name,
+    so the bigger the "k" the later the test between all the tests with the same name.
+
+    for more detailed, you can hover with your mouse over each "bar" in the bar graph.
+    --------------------------------------------------------------------------------------------------------------------------------------------
 
     """)
     for Type in ["language","math","english"]:
         if len(preformanceInTypeByName_and_Date_x[Type])>0 and len(preformanceInTypeByName_and_Date_y[Type])>0:
-            labels = {"x":"Date of test","y":"Sum of correct answers in type per test"}
-            title = f"Graph of {Type} chapter type's preformance over time"
-            hovertemplate="<i>Sum</i>: %{y}<br><b>Name</b>: %{x}<br><b>Date</b>: %{text}"
+            labels = {"x":"Name of test","y":"Average of correct answers per chapter in type per test"}
+            title = f"Graph of {Type} chapter type's preformance over name/time"
+            hovertemplate="<i>Average</i>: %{y} / "+str(PsychoTest_Classes.ChapterTypes[Type])+" <br><b>Name of test</b>: %{x}<br><b>Date</b>: %{text}"
             HistogramsGraphGenerator(title=title,x=preformanceInTypeByName_and_Date_x[Type],y=preformanceInTypeByName_and_Date_y[Type],labels=labels,text=datetimeIndexies[Type],hovertemplate=hovertemplate)
         else:
             print(f"You don't have in these tests results in this type {Type}.\nSo NO GRAPH FOR YOU! :)")
@@ -359,6 +370,20 @@ Returning to Main Menu.............
 
 
 def MANAGEmode(DataBases):
+    open_message = """
+
+    ##################################################################
+    ##################################################################
+
+    Welcome to 'Manage existing tests in the system database' option!
+    ---------------------------------
+
+    Here you will be able to edit an exisiting test in the system.
+    Have it checked and analysed!
+    ##################################################################
+    
+    """
+    print(open_message)
     final_message = f"""
 #####################################################################################
 #####################################################################################
@@ -377,7 +402,62 @@ Returning to Main Menu.............
         return "CANCEL"
     if input("If you wish to return to the Main Menu, and not to continue in this option.\nEnter the digit 0 , else Enter any other key. : ") == "0":
         return "CANCEL"
+    print("-"*30+"\n"+"To protect you from accidential edits,\nyou are only able to retrieve tests by name,\nthen you will be asked the exact date/version of test to edit."+"\n"+"-"*30)
+    dictOfReleaventTests = retrieveTestsByName(DataBases)
+    if dictOfReleaventTests == {}:
+        return final_message
+    sorted_keys = sorted(dictOfReleaventTests.keys())
+    nameOfTest = dictOfReleaventTests[sorted_keys[0]].nameOfTest
+    msg = f"""
+    ------------------------------------------------------------------------------
+    These are the test with this, {nameOfTest}, as their name.
+
+    The following are the dates/versions of all the tests with the same name, as the above.:
+
+
+"""
+    for position in range(len(sorted_keys)):
+        msg +=f"""{position}. {sorted_keys[position]}""" +"\n"
+    print(msg)
+    try:
+        chosenDateToEdit = int(input("Enter the number on the left of the dot, for the test you wish to edit. : "))
+    except ValueError:
+        print("You have entered an invalid input, you are being returend to main menu.")
+        return final_message
+    if not chosenDateToEdit in range(len(sorted_keys)):
+            print("You have entered an invalid input, you are being returend to main menu.")
+            return final_message
+    print("You have entered this :",chosenDateToEdit)
+    print("The chosen test:\n"+"-"*15)
+    print(dictOfReleaventTests[sorted_keys[chosenDateToEdit]])
+    options = input("Are you sure you want to edit this test?\nEnter 'yes' if you are, else press the enter key or enter any key. : ")
+    if options == "yes":
+        for i in range(len(dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters)):
+            print(dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters[i])
+            if input("Would you like to edit/modify this chapter?\nEnter 'yes' to do so, else press the Enter key. : ") == "yes":
+                dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters[i].modifyAnswers()
+                print("This is the chapter you have edited: ")
+                print(dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters[i])
+                while input("Are all the answers that had been entered are correct? If no enter 'no'. : ") == "no":
+                    dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters[i].modifyAnswers()
+                    print("This is the chapter you have entered: ")
+                    print(dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters[i])    
+        print("\n"+"-"*30+"\n"+"Analysing test....."+"\n"+"-"*15)
+        dictOfReleaventTests[sorted_keys[chosenDateToEdit]].test_results = {}
+        print(dictOfReleaventTests[sorted_keys[chosenDateToEdit]].check_test(DataBases["onlineDB"]))
+        print("#"*40)
+        DataBases["Main_LocalDB"][nameOfTest].pop(sorted_keys[chosenDateToEdit])
+        if DataBases["Main_LocalDB"][nameOfTest] == {}:
+            DataBases["Main_LocalDB"].pop(nameOfTest)
+        print("Uploading edited test results and it's analysis to local database.")
+        print("-"*70+"\nPlease choose to 'new version with the same name, but different time of creation'\nIf it raises for you.\n"+"-"*70)
+        if not dictOfReleaventTests[sorted_keys[chosenDateToEdit]].intoDataBase(DataBases["Main_LocalDB"]):
+            print("ERROR: In intoDataBase(), Local database in Databases isn't a Dictionary instance/type. ")
+            print("Please contact FXP Psychometry management.")
+        return final_message
+    print("***System did not edit anything or failed to do so.***")
     return final_message
+
 
 
 def DELETEmode(DataBases):
@@ -428,7 +508,7 @@ Returning to Main Menu.............
     The following are the dates/versions of all the tests with the same name, as the above.:
 
 
-    """
+"""
     for position in range(len(sorted_keys)):
         msg +=f"""{position}. {sorted_keys[position]}""" +"\n"
     print(msg)

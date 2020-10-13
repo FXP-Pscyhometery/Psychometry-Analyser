@@ -58,10 +58,10 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
         print("Entered blank/new chapter state, enter answers now:")
         for i in range(len(self.q_a)):
             digit = input(f"Answer to question number {i+1}: ")
-            if not digit.isdigit() or not digit in ["1","2","3","4"]:
+            if not digit.isdigit() or not int(digit) in range(1,5):
                 print("Invalid input, please enter again!")
                 digit = input(f"Answer to question number {i+1}: ")
-            if not digit.isdigit() or not digit in ["1","2","3","4"]:
+            if not digit.isdigit() or not int(digit) in range(1,5):
                 print("Again invalid input, restarting answers fill.....")
                 return self.enterAnswers()
             self.q_a[i]= int(digit)
@@ -69,10 +69,31 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
 
     def modifyAnswers(self): #
         print("Entered chapter modify state:")
-        Times = int(input("How many q&a you want to modify?: "))
+        Times = input("How many q&a you want to modify?: ")
+        if not Times.isdigit():
+            print("Invalid input, please enter again!")
+            Times = input("How many q&a you want to modify?: ")
+        if not Times.isdigit():
+            print("Again invalid input, restarting answers fill.....")
+            return self.modifyAnswers()
+        Times = int(Times)
         for i in range(Times):
-            q= int(input("Enter number of question: "))
-            a= int(input("Enter number of answer: "))
+            q= input("Enter number of question: ")
+            if not q.isdigit() or not int(q) in range(1,len(self.q_a) + 1):
+                print("Invalid input, please enter again!")
+                q= input("Enter number of question: ")
+            if not q.isdigit() or not int(q) in range(1,len(self.q_a) + 1):
+                print("Again invalid input, restarting answers fill.....")
+                return self.modifyAnswers()
+            q = int(q)
+            a= input("Enter number of answer: ")
+            if not a.isdigit() or not int(a) in range(1,5):
+                print("Invalid input, please enter again!")
+                a= input("Enter number of answer: ")
+            if not a.isdigit() or not int(a) in range(1,5):
+                print("Again invalid input, restarting answers fill.....")
+                return self.modifyAnswers()
+            a = int(a)
             self.q_a[q-1]=a
         print("Finished modifying!")
     def __repr__(self): #Debuging form of repersantation of Chapter object
