@@ -7,7 +7,7 @@ import statistics
 import requests
 
 ChapterTypes = { "language": 23,"math": 20,"english": 22 } # a dictionary to set the diffrent types of Psychometry chapters
-OnlineDB_GET_Response = requests.get("https://raw.githubusercontent.com/FXP-Pscyhometery/Psychomectry-Analysis-Documentation/master/DataBase.json")
+OnlineDB_GET_Response = requests.get("https://raw.githubusercontent.com/FXP-Pscyhometery/FXP-Psychometry-Analyser/master/DataBase.json")
 
 def chapterTypeGenerator():
      print("Enter the type of this chapter.\nEnter '1' for a language type.\nOr enter '2' for a math type.\nOr enter '3' for an english type.\nOf course without any commas.")
