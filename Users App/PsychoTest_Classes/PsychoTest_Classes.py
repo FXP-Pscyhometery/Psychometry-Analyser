@@ -253,8 +253,11 @@ class PsychoTest_test:
             print("You already have a test with the same name.")
             if input("Do you wish to choose a different name for the new test? enter 'yes' to do so. : ")=="yes":
                 self.nameOfTest = input("Enter new name here : ")
+                DB[self.nameOfTest] = {self.creationOfTestObject_DateTime:self.test_results}
+                return True
             elif input("Do you wish to add a new version with the same name, but different time of creation? enter 'yes' to do so. : ") == "yes":
                 DB[self.nameOfTest][self.creationOfTestObject_DateTime] = self.test_results
+                return True
         DB[self.nameOfTest] = {self.creationOfTestObject_DateTime:self.test_results}
         return True
     @classmethod

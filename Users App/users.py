@@ -266,7 +266,7 @@ Returning to Main Menu.............
     sumOfCorrectAnswersOfChaptersByType = {"language":0,"math":0,"english":0}
     preformanceInTypeByName_and_Date_y = {"language":[],"math":[],"english":[]}
     preformanceInTypeByName_and_Date_x = {"language":[],"math":[],"english":[]}
-    testWithSameName = {}
+    testWithSameName = {"language":{},"math":{},"english":{}}
     datetimeIndexies = {"language":[],"math":[],"english":[]}
     for timeIndex in sorted(dictOfReleaventOfTests.keys()):
         tempSum = {"language":0,"math":0,"english":0}
@@ -276,11 +276,11 @@ Returning to Main Menu.............
         for Type in ["language","math","english"]:
             if tempSum[Type]>0:
                 tempNameOfTest = dictOfReleaventOfTests[timeIndex].nameOfTest
-                if not tempNameOfTest in testWithSameName:
-                    testWithSameName[tempNameOfTest] = 1
+                if not tempNameOfTest in testWithSameName[Type]:
+                    testWithSameName[Type][tempNameOfTest] = 1
                 else:
-                    testWithSameName[tempNameOfTest] += 1
-                preformanceInTypeByName_and_Date_x[Type].append(tempNameOfTest+f"-{testWithSameName[tempNameOfTest]}")
+                    testWithSameName[Type][tempNameOfTest] += 1
+                preformanceInTypeByName_and_Date_x[Type].append(tempNameOfTest+f"-{testWithSameName[Type][tempNameOfTest]}")
                 datetimeIndexies[Type].append(timeIndex)
                 preformanceInTypeByName_and_Date_y[Type].append(tempSum[Type])
                 sumOfCorrectAnswersOfChaptersByType[Type] += tempSum[Type]
