@@ -4,8 +4,23 @@
 
 import datetime
 import statistics
+import requests
 
 ChapterTypes = { "language": 23,"math": 20,"english": 22 } # a dictionary to set the diffrent types of Psychometry chapters
+OnlineDB_GET_Response = requests.get("https://raw.githubusercontent.com/FXP-Pscyhometery/Psychomectry-Analysis-Documentation/master/DataBase.json")
+
+def chapterTypeGenerator():
+     print("Enter the type of this chapter.\nEnter '1' for a language type.\nOr enter '2' for a math type.\nOr enter '3' for an english type.\nOf course without any commas.")
+     choice = input("Enter here : ")
+     if choice == "1":
+         return "langauge"
+     if choice == "2":
+         return "math"
+     if choice == "3":
+         return "english"
+     print("You have enterd an invalid input.\nPlease enter a valid input.")
+     return chapterTypeGenerator()
+
 
 logo = """
                                                                                                                                                                                                         

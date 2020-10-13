@@ -1,3 +1,4 @@
+#Made by @gilbear and @gilkzxc
 import json
 import time
 from PsychoTest_Classes import PsychoTest_Classes
@@ -95,15 +96,14 @@ Let's get started!!!!
 
 """
 
-print("Please change to maximum window")
-time.sleep(4)
+input("Please change to maximum window.\nPress the Enter key to continue.")
 print(PsychoTest_Classes.logo)
 time.sleep(1)
 print(start_message)
 time.sleep(2.5)
 
 
-response = requests.get("https://raw.githubusercontent.com/FXP-Pscyhometery/Psychomectry-Analysis-Documentation/master/DataBase.json")
+response = PsychoTest_Classes.OnlineDB_GET_Response
 if response.status_code != 200:
     print("Failed to fetch the DataBase from it's online source. HTTP GET Request failed, not 200.")
     if input("Would you like to use a new/blank DataBase? Enter yes for yes, else any key to exit. : ") == "yes":
