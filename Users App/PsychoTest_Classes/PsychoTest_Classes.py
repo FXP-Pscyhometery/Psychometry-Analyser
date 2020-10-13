@@ -3,7 +3,6 @@
 
 
 import datetime
-import statistics
 import requests
 
 ChapterTypes = { "language": 23,"math": 20,"english": 22 } # a dictionary to set the diffrent types of Psychometry chapters

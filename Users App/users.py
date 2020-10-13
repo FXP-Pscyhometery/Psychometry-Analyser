@@ -8,7 +8,7 @@ import time
 import datetime
 from json.decoder import JSONDecodeError
 import plotly.express as plotly_express
-import plotly.graph_objects as go
+
 
 os.system("title Psychometry Analyser")
 def createLocalDBFolder():#Creates on call home folder and path object of it ,in this folder all data is been stored.
