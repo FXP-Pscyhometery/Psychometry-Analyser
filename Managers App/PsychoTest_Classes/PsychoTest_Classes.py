@@ -13,7 +13,7 @@ def chapterTypeGenerator():
      print("Enter the type of this chapter.\nEnter '1' for a language type.\nOr enter '2' for a math type.\nOr enter '3' for an english type.\nOf course without any commas.")
      choice = input("Enter here : ")
      if choice == "1":
-         return "langauge"
+         return "language"
      if choice == "2":
          return "math"
      if choice == "3":
@@ -57,7 +57,14 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
     def enterAnswers(self): # A function, that lets the user enter his answers to the chapter Object.
         print("Entered blank/new chapter state, enter answers now:")
         for i in range(len(self.q_a)):
-            self.q_a[i]= int(input(f"Answer to question number {i+1}: "))
+            digit = input(f"Answer to question number {i+1}: ")
+            if not digit.isdigit() or not digit in ["1","2","3","4"]:
+                print("Invalid input, please enter again!")
+                digit = input(f"Answer to question number {i+1}: ")
+            if not digit.isdigit() or not digit in ["1","2","3","4"]:
+                print("Again invalid input, restarting answers fill.....")
+                return self.enterAnswers()
+            self.q_a[i]= int(digit)
         print("Finished entering answers to this chapter!")
 
     def modifyAnswers(self): #
