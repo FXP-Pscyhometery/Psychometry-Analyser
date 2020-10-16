@@ -406,41 +406,31 @@ Returning to Main Menu.............
     for position in range(len(sorted_keys)):
         msg +=f"""{position}. {sorted_keys[position]}""" +"\n"
     print(msg)
-    try:
-        chosenDateToEdit = int(input("Enter the number on the left of the dot, for the test you wish to edit. : "))
-    except ValueError:
-        print("You have entered an invalid input, you are being returend to main menu.")
+    chosenDateToEdit = PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Choose the date of the test you wish to edit:",sorted_keys+["CANCEL/GO BACK TO MAIN MENU"])
+    if chosenDateToEdit == "CANCEL/GO BACK TO MAIN MENU":
+        print("***System did not edit anything or failed to do so.***")
         return final_message
-    if not chosenDateToEdit in range(len(sorted_keys)):
-            print("You have entered an invalid input, you are being returend to main menu.")
-            return final_message
-    print("You have entered this :",chosenDateToEdit)
     print("The chosen test:\n"+"-"*15)
-    print(dictOfReleaventTests[sorted_keys[chosenDateToEdit]])
+    print(dictOfReleaventTests[chosenDateToEdit])
     options = PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Are you sure you want to edit this test? :",["yes","no"])
     if options == "yes":
-        for i in range(len(dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters)):
-            print(dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters[i])
+        for i in range(len(dictOfReleaventTests[chosenDateToEdit].chapters)):
+            print(dictOfReleaventTests[chosenDateToEdit].chapters[i])
             if PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Would you like to edit/modify this chapter? :",["yes","no"]) == "yes":
-                dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters[i].modifyAnswers()
+                dictOfReleaventTests[chosenDateToEdit].chapters[i].modifyAnswers()
                 print("This is the chapter you have edited: ")
-                print(dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters[i])
+                print(dictOfReleaventTests[chosenDateToEdit].chapters[i])
                 while PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Are all the answers that had been entered are correct? :",["yes","no"]) == "no":
-                    dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters[i].modifyAnswers()
+                    dictOfReleaventTests[chosenDateToEdit].chapters[i].modifyAnswers()
                     print("This is the chapter you have entered: ")
-                    print(dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters[i])    
+                    print(dictOfReleaventTests[chosenDateToEdit].chapters[i])    
         print("\n"+"-"*30+"\n"+"Analysing test....."+"\n"+"-"*15)
-        dictOfReleaventTests[sorted_keys[chosenDateToEdit]].test_results = {}
-        print(dictOfReleaventTests[sorted_keys[chosenDateToEdit]].check_test(DataBases["onlineDB"]))
+        dictOfReleaventTests[chosenDateToEdit].test_results = {}
+        print(dictOfReleaventTests[chosenDateToEdit].check_test(DataBases["onlineDB"]))
         print("#"*40)
-        DataBases["Main_LocalDB"][nameOfTest].pop(sorted_keys[chosenDateToEdit])
-        if DataBases["Main_LocalDB"][nameOfTest] == {}:
-            DataBases["Main_LocalDB"].pop(nameOfTest)
+        DataBases["Main_LocalDB"][nameOfTest].pop(chosenDateToEdit)
         print("Uploading edited test results and it's analysis to local database.")
-        print("-"*70+"\nPlease choose to 'new version with the same name, but different time of creation'\nIf it raises for you.\n"+"-"*70)
-        if not dictOfReleaventTests[sorted_keys[chosenDateToEdit]].intoDataBase(DataBases["Main_LocalDB"]):
-            print("ERROR: In intoDataBase(), Local database in Databases isn't a Dictionary instance/type. ")
-            print("Please contact FXP Psychometry management.")
+        DataBases["Main_LocalDB"][dictOfReleaventTests[chosenDateToEdit].nameOfTest][dictOfReleaventTests[chosenDateToEdit].creationOfTestObject_DateTime] = dictOfReleaventTests[chosenDateToEdit].test_results
         return final_message
     print("***System did not edit anything or failed to do so.***")
     return final_message
@@ -500,7 +490,7 @@ Returning to Main Menu.............
         msg +=f"""{position}. {sorted_keys[position]}""" +"\n"
     print(msg)
     
-    #if input("If you wanted to delete all the tests with the same name.\nEnter the name to confirm you are sure you want to delete them all.\nElse just press the enter key.\nREMEBER THIS IS IRREVERSIBLE\nEnter here :  ") == nameOfTest:
+    
     print("If you wanted to delete all the tests with the same name.\nChoose to confirm you are sure you want to delete them all.\nREMEBER THIS IS IRREVERSIBLE!!!")
     if PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("To delete all tests with the same name?:",["YES","NO"])== "YES":
         DataBases["Main_LocalDB"].pop(nameOfTest)

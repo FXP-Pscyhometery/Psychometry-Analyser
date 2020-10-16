@@ -206,6 +206,8 @@ class PsychoTest_test:
     def __init__(self, nameOfTest=""):
         if nameOfTest == "":
             self.nameOfTest = self.newName()
+        else:
+            self.nameOfTest = nameOfTest
         self.chapters  = []
         self.creationOfTestObject_DateTime = str(datetime.datetime.now())
         self.test_results = {}
