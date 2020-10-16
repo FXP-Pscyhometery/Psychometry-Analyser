@@ -4,7 +4,6 @@
 
 import datetime
 import requests
-#from pick import pick
 from PyInquirer import prompt, Separator
 
 ChapterTypes = { "language": 23,"math": 20,"english": 22 } # a dictionary to set the diffrent types of Psychometry chapters
@@ -32,7 +31,7 @@ def newInputChapterGenerator(onlineDataBase):
     print("This is the chapter you have entered: ")
     print(tempChapter)
         
-    while input("Are all the answers that had been entered are correct? If no enter 'no'. : ") == "no":
+    while PyInquirer_prompt_wrapper_listReady("Are all the answers that had been entered are correct? :",["yes","no"]) == "no":
         tempChapter.modifyAnswers()
         print("This is the chapter you have entered: ")
         print(tempChapter)
