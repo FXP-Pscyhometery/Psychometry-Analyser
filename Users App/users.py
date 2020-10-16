@@ -8,6 +8,8 @@ import time
 import datetime
 from json.decoder import JSONDecodeError
 import plotly.express as plotly_express
+from PyInquirer import prompt, Separator
+
 
 
 os.system("title Psychometry Analyser")
@@ -19,7 +21,7 @@ def createLocalDBFolder():#Creates on call home folder and path object of it ,in
 def dateHandler():
     tempDate = datetime.datetime(int(input("\nEnter the year (in YYYY format): ")),int(input("\nEnter the month : ")),int(input("\nEnter the day : ")))
     print("This the date you have entered : ",str(tempDate))
-    if input("Is it the correct ? If no enter 'no', else enter any key. : ") == "no":
+    if PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Is it the correct ? :",["yes","no"]) == "no":
         return dateHandler()
     return tempDate
 
@@ -39,7 +41,7 @@ def HistogramsGraphGenerator(title,x,y,labels={"x":"x","y":"y"},text=None,hovert
 
 
 def retrieveTestsByName(DataBases):
-    opening_text = """
+    opening_text = f"""
     _______________________________________________________________
     Tests by name retriever!
     -----------------------------
@@ -47,16 +49,17 @@ def retrieveTestsByName(DataBases):
     through entering their name.
 
     ---------------------------------------------------------------
-    If the name you have entered is incorrect or there isn't a test
-    with that name.
+    In case you don't want any of the following names
+    Choose "{PsychoTest_Classes.cancelKeyWordOfRetrievers}"
     Then no test would be retrieved of course.
     ---------------------------------------------------------------
 
     """
     print(opening_text)
-    nameOfTest = input("Enter the name of the test\s you would like to retrieve. : ")
-    if not nameOfTest in DataBases["Main_LocalDB"]:
-        print("The name you have entered is wrong\nOr there isn't a test with this name.\nTherefore you retrieve none.")
+    nameOfTest = PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Choose the name of the test\s you would like to retrieve. :",list(DataBases["Main_LocalDB"].keys())+[PsychoTest_Classes.cancelKeyWordOfRetrievers])
+    if (nameOfTest == PsychoTest_Classes.cancelKeyWordOfRetrievers) or (not nameOfTest in DataBases["Main_LocalDB"]):
+        print("You have choosen to retrieve none.")
+        print("Or the name you have entered is wrong\nOr there isn't a test with this name.\nTherefore you retrieve none.")
         return {}
     dictOfReleaventOfTests = {}
     for datetime_index in DataBases["Main_LocalDB"][nameOfTest]:
@@ -83,10 +86,11 @@ def retrieveTestsByTimeSpan(DataBases):
 
     """
     print(opening_text)
-    print("Now enter the date of from when it's releavent for you. :\n")
+    print("Now enter the date of from when it's releavent for you. :")
     start_timeSpan = dateHandler()
-    print("Now enter the date of untill when it's releavent for you. :\n")
-    if input("Would you like it to be untill now, in time also?\nFor example if you had enterd a test today, and you wanted it to be included.\nEnter 'yes' for untill now, in date and time, else enter any key. : ") == "yes":
+    print("Now enter the date of untill when it's releavent for you. :")
+    print("Would you like it to be untill now, in time also?\nFor example if you had enterd a test today, and you wanted it to be included.")
+    if PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Do you want it to be untill now? :",["yes","no"]) == "yes":
         end_timeSpan = datetime.datetime.now()
     else:
         end_timeSpan = dateHandler()
@@ -155,29 +159,18 @@ def ADDmode(Databases):
     
     """
     print(open_message)
-    if input("If you wish to return to the Main Menu, and not to continue in this option.\nEnter the digit 0 , else Enter any other key. : ") == "0":
+    if (not isinstance(Databases,dict)) or (not isinstance(Databases["Main_LocalDB"],dict)):
+        print("ERROR:DataBases or Local database in Databases isn't a Dictionary instance/type. ")
+        print("Please contact FXP Psychometry management.")
         return "CANCEL"
-    newTestObject = PsychoTest_Classes.PsychoTest_test(input("Enter a name of your choice for your test. : "))
+    if PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Do you wish to return to the Main Menu, and not to continue in this option?: ",["CONTINUE","GO BACK"]) == "GO BACK":
+        return "CANCEL"
+    newTestObject = PsychoTest_Classes.PsychoTest_test()
     print("\n"+"Next you will be adding new chapters to your test."+"\n"+"-"*30)
     inerState = "yes"
     while inerState == "yes":
-        print("\n"+"New chapter:"+"\n"+"-"*15)
-        typeOfChapter = PsychoTest_Classes.chapterTypeGenerator()
-        numberOfChapter = input("Enter the number ID of the chapter, like in the pdf of the National Center, MALO.\nFor example each published test/pdf, has in order, language 1 and language 2, math 1 and math 2, and english 1 and english 2.\nThese 1 and 2's are the ID of the chapter.\nJust enter 1 or 2. : ")
-        periodOfChapter = input("Enter the period of the test/pdf, the chapter is from.\nFor example, 'July', the month the test was, if it's from before 2018.\nOr enter the season, for examle, 'Winter', like in 'Winter 2019', just without the year please. : ")
-        yearOfChapter = input("Enter the year of the test/pdf, the chapter is from. In YYYY format. : ")
-        tempChapter = PsychoTest_Classes.PsychoTest_chapter(typeOfChapter, numberOfChapter, periodOfChapter, yearOfChapter)
-        tempChapter.enterAnswers()
-        print("This is the chapter you have entered: ")
-        print(tempChapter)
-        
-        while input("Are all the answers that had been entered are correct? If no enter 'no'. : ") == "no":
-            tempChapter.modifyAnswers()
-            print("This is the chapter you have entered: ")
-            print(tempChapter)
-            
-        print(newTestObject.addChapter(tempChapter))
-        inerState = input("Do you want to add another chapter? If yes enter 'yes', else Enter any key. : ")
+        print(newTestObject.addChapter(PsychoTest_Classes.newInputChapterGenerator(Databases["onlineDB"])))
+        inerState = PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Do you want to add another chapter? :", ["yes","no"])
     
     print("\n"+"-"*30+"\n"+"Analysing test....."+"\n"+"-"*15)
     print(newTestObject.check_test(Databases["onlineDB"]))
@@ -231,33 +224,26 @@ Returning to Main Menu.............
     if DataBases["Main_LocalDB"] == {}:
         print("You have 0 tests in the local database, therefore you are being returned to the main menu.")
         return "CANCEL"
-    if input("If you wish to return to the Main Menu, and not to continue in this option.\nEnter the digit 0 , else Enter any other key. : ") == "0":
+    if PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Do you wish to return to the Main Menu, and not to continue in this option?: ",["CONTINUE","GO BACK"]) == "GO BACK":
         return "CANCEL"
-    view_1st_main_message = """
+    view_main = [
+"1)You can retrieve a specific singulare test by name.\n   (If you have entered more than one test with the same name, the system would retrieve and review all of them.)",Separator("\n "+"-"*100+"\n"),
+"2)You can choose a time span to retrieve all tests you have created/uploaded between the dates you will choose.\n   (If you want a specific test, than you can also choose this option.\n   Useful, for example, you have forgotten the name of the test,\n   or you have a bunch of tests with the same name, and still want a single one.)"]
+    print("""
     -------------------------------------------------------------------------
 
     You can view a few tests or review, you can check all of them, or only one.
-    Two options:
-    ------------
-    1)You can retrieve a specific singulare test by name.
-        (If you have entered more than one test with the same name, the system would retrieve and review all of them.)
-
-    OR
-
-    2)You can choose a time span to retrieve all tests you have created/uploaded between the dates you will choose.
-        (If you want a specific test, than you can also choose this option.
-         Useful, for example, you have forgotten the name of the test,
-         or you have a bunch of tests with the same name, and still want a single one.)
-
+""")
+    dictOfReleaventOfTests = {}
+    option = PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Choose the option you would like to go with. : ",view_main)
+    print("""
+    
     ---------------------------------------------------------------------------------------------------------------
 
-    """
-    print(view_1st_main_message)
-    dictOfReleaventOfTests = {}
-    option = input("Enter the option you would like to go with.\nEnter the digit of each option, '1' for by name, '2' for by between dates. : ")
-    if option == "1":
+    """)
+    if option[0] == "1":
         dictOfReleaventOfTests = retrieveTestsByName(DataBases)
-    elif option == "2":
+    elif option[0] == "2":
         dictOfReleaventOfTests = retrieveTestsByTimeSpan(DataBases)
     if dictOfReleaventOfTests == {}:
         return final_message
@@ -344,6 +330,7 @@ Returning to Main Menu.............
     --------------------------------------------------------------------------------------------------------------------------------------------
 
     """)
+    time.sleep(2)
     for Type in ["language","math","english"]:
         if len(preformanceInTypeByName_and_Date_x[Type])>0 and len(preformanceInTypeByName_and_Date_y[Type])>0:
             labels = {"x":"Name of test","y":"Average of correct answers per chapter in type per test"}
@@ -353,11 +340,11 @@ Returning to Main Menu.............
         else:
             print(f"You don't have in these tests results in this type {Type}.\nSo NO GRAPH FOR YOU! :)")
     time.sleep(2)
-    if input("Would you like to see brief of the preformance for each test?\nEnter 'yes' to do so, else enter any key. : ") == "yes":
+    if PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Would you like to see brief of the preformance for each test? :",["yes","no"]) == "yes":
         print("#"*30+"\n")
         for timeIndex in sorted(dictOfReleaventOfTests.keys()):
             print(dictOfReleaventOfTests[timeIndex])
-            if input("Would you like to see full analysis of test?\nEnter 'yes' to do so, else enter any key. : ") == "yes":
+            if PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Would you like to see full analysis of test? :",["yes","no"]) == "yes":
                 print("\n"+"-"*30)
                 print(dictOfReleaventOfTests[timeIndex].check_test(DataBases["onlineDB"]))
                 print("\n"+"-"*30)
@@ -400,7 +387,7 @@ Returning to Main Menu.............
     if DataBases["Main_LocalDB"] == {}:
         print("You have 0 tests in the local database, therefore you are being returned to the main menu.")
         return "CANCEL"
-    if input("If you wish to return to the Main Menu, and not to continue in this option.\nEnter the digit 0 , else Enter any other key. : ") == "0":
+    if PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Do you wish to return to the Main Menu, and not to continue in this option?: ",["CONTINUE","GO BACK"]) == "GO BACK":
         return "CANCEL"
     print("-"*30+"\n"+"To protect you from accidential edits,\nyou are only able to retrieve tests by name,\nthen you will be asked the exact date/version of test to edit."+"\n"+"-"*30)
     dictOfReleaventTests = retrieveTestsByName(DataBases)
@@ -430,15 +417,15 @@ Returning to Main Menu.............
     print("You have entered this :",chosenDateToEdit)
     print("The chosen test:\n"+"-"*15)
     print(dictOfReleaventTests[sorted_keys[chosenDateToEdit]])
-    options = input("Are you sure you want to edit this test?\nEnter 'yes' if you are, else press the enter key or enter any key. : ")
+    options = PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Are you sure you want to edit this test? :",["yes","no"])
     if options == "yes":
         for i in range(len(dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters)):
             print(dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters[i])
-            if input("Would you like to edit/modify this chapter?\nEnter 'yes' to do so, else press the Enter key. : ") == "yes":
+            if PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Would you like to edit/modify this chapter? :",["yes","no"]) == "yes":
                 dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters[i].modifyAnswers()
                 print("This is the chapter you have edited: ")
                 print(dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters[i])
-                while input("Are all the answers that had been entered are correct? If no enter 'no'. : ") == "no":
+                while PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Are all the answers that had been entered are correct? :",["yes","no"]) == "no":
                     dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters[i].modifyAnswers()
                     print("This is the chapter you have entered: ")
                     print(dictOfReleaventTests[sorted_keys[chosenDateToEdit]].chapters[i])    
@@ -493,9 +480,9 @@ Returning to Main Menu.............
     if DataBases["Main_LocalDB"] == {}:
         print("You have 0 tests in the local database, therefore you are being returned to the main menu.")
         return "CANCEL"
-    if input("If you wish to return to the Main Menu, and not to continue in this option.\nEnter the digit 0 , else Enter any other key. : ") == "0":
+    if PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Do you wish to return to the Main Menu, and not to continue in this option?: ",["CONTINUE","GO BACK"]) == "GO BACK":
         return "CANCEL"
-    print("-"*30+"\n"+"To protect you from accidential deletes,\nyou are only able to retrieve tests by name,\nthen you will be asked the exact date/version of test to delete."+"\n"+"-"*30)
+    print("-"*70+"\n"+"To protect you from accidential deletes,\nyou are only able to retrieve tests by name,\nthen you will be asked the exact date/version of test to delete."+"\n"+"-"*70)
     dictOfReleaventTests = retrieveTestsByName(DataBases)
     if dictOfReleaventTests == {}:
         return final_message
@@ -512,24 +499,22 @@ Returning to Main Menu.............
     for position in range(len(sorted_keys)):
         msg +=f"""{position}. {sorted_keys[position]}""" +"\n"
     print(msg)
-    if input("If you wanted to delete all the tests with the same name.\nEnter the name to confirm you are sure you want to delete them all.\nElse just press the enter key.\nREMEBER THIS IS IRREVERSIBLE\nEnter here :  ") == nameOfTest:
+    
+    #if input("If you wanted to delete all the tests with the same name.\nEnter the name to confirm you are sure you want to delete them all.\nElse just press the enter key.\nREMEBER THIS IS IRREVERSIBLE\nEnter here :  ") == nameOfTest:
+    print("If you wanted to delete all the tests with the same name.\nChoose to confirm you are sure you want to delete them all.\nREMEBER THIS IS IRREVERSIBLE!!!")
+    if PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("To delete all tests with the same name?:",["YES","NO"])== "YES":
         DataBases["Main_LocalDB"].pop(nameOfTest)
         print("Deleted all the tests with the same name from the local database.")
         return final_message
-    try:
-        chosenDateToDelete = int(input("Enter the number on the left of the dot, for the test you wish to delete. : "))
-    except ValueError:
-        print("You have entered an invalid input, you are being returend to main menu.")
+    chosenDateToDelete = PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Choose the date of the test you wish to delete:",sorted_keys+["CANCEL/GO BACK TO MAIN MENU"])
+    if chosenDateToDelete == "CANCEL/GO BACK TO MAIN MENU":
+        print("***System did not delete anything or failed to do so.***")
         return final_message
-    if not chosenDateToDelete in range(len(sorted_keys)):
-            print("You have entered an invalid input, you are being returend to main menu.")
-            return final_message
-    print("You have entered this :",chosenDateToDelete)
     print("The chosen test:\n"+"-"*15)
-    print(dictOfReleaventTests[sorted_keys[chosenDateToDelete]])
-    options = input("Are you sure you want to delete this test?\nEnter 'yes' if you are, else press the enter key or enter any key. : ")
-    if options == "yes":
-        DataBases["Main_LocalDB"][nameOfTest].pop(sorted_keys[chosenDateToDelete])
+    print(dictOfReleaventTests[chosenDateToDelete])
+    options = PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Are you sure you want to delete this test?:",["YES","NO"])
+    if options == "YES":
+        DataBases["Main_LocalDB"][nameOfTest].pop(chosenDateToDelete)
         print("Deleted the chosen test with the chosen name and chosen date from the local database.")
         if DataBases["Main_LocalDB"][nameOfTest] == {}:
             DataBases["Main_LocalDB"].pop(nameOfTest)
@@ -566,60 +551,33 @@ DataBases,Main_LocalDB_Path = startUp()
 
 if DataBases == "EXIT":
     exit()
-Main_message = """
-MAIN MENU:
----------
-      In the following lines, the options/Menu will be shown.
-      To choose an option, enter the digit that is shown on the left of each option to select it.
-      #
-      #
-      #
-      #
-      1) Add a new test.
-        -----------------
-        ( This option will transfer you to the adding system, where you can add a test you had solved.)
-        -----------------------------------------------------------------------------------------------
-       #
-       #
-       #
-       #
-       2) View Statistics and Documentations of tests in your Local database.
-          -----------------------------------------------
-          (This option will transfer you to the statitics, documentations and results of all the tests you have enterd here before.)
-          -----------------------------------------------------------------------------------------------------------------
-        #
-        #
-        #
-        #
-        3) Manage existing tests in the system database.
-           ------------------------------------------------------------
-           (This option is for if you want to manage/edit/check/fill a previous enterd test from the database.)
-           ----------------------------------------------------------------------------------
-        #
-        #
-        #
-        #
-        4) Delete tests from the database.
-           -------------------------------
-           (This option will let you delete tests you have entered in the system before.)
-           ------------------------------------------------------------------------------
-        #
-        #
-        #
-        #
-        0) Exit the program.
-           -----------------
-           *Only by exiting through this option all changes will be saved.*
-        #
-        #
-        Please enter your choice in the next line.
-        #######################################################################################
-"""
+Main_Menu = ["""1) Add a new test.
+   -----------------
+   ( This option will transfer you to the adding system, where you can add a test you had solved.)
+   -----------------------------------------------------------------------------------------------""",Separator("\n#\n#"),
+"""2) View Statistics and Documentations of tests in your Local database.
+   ------------------------------------------------------------------------
+   (This option will transfer you to the statitics, documentations and results of all the tests you have enterd here before.)
+   --------------------------------------------------------------------------------------------------------------------------""",Separator("\n#\n#"),
+        
+"""3) Manage existing tests in the system database.
+   ------------------------------------------------------------
+   (This option is for if you want to manage/edit/check/fill a previous enterd test from the database.)
+   ----------------------------------------------------------------------------------------------------""",Separator("\n#\n#"),
+"""4) Delete tests from the database.
+      -------------------------------
+      (This option will let you delete tests you have entered in the system before.)
+      ------------------------------------------------------------------------------""",Separator("\n#\n#"),
+"""0) Exit the program.
+      -----------------
+      *Only by exiting through this option all changes will be saved.*
+      ----------------------------------------------------------------"""]
 
 runMenu = True
 while runMenu:
-    print(Main_message)
-    user_selected_this_option = input("Enter here the option you want to proceed with. Remember, enter the digit! : ")
+    #print(Main_message)
+    #user_selected_this_option = input("Enter here the option you want to proceed with. Remember, enter the digit! : ")
+    user_selected_this_option = PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("MAIN MENU:",Main_Menu)[0]
     if user_selected_this_option == "1":
         print(ADDmode(DataBases))
     elif user_selected_this_option == "2":

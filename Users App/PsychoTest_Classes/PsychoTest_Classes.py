@@ -4,21 +4,40 @@
 
 import datetime
 import requests
+#from pick import pick
+from PyInquirer import prompt, Separator
 
 ChapterTypes = { "language": 23,"math": 20,"english": 22 } # a dictionary to set the diffrent types of Psychometry chapters
 OnlineDB_GET_Response = requests.get("https://raw.githubusercontent.com/FXP-Pscyhometery/FXP-Psychometry-Analyser/master/DataBase.json")
+cancelKeyWordOfRetrievers = "DON'T RETRIEVE ANY!"
+
+def PyInquirer_prompt_wrapper_listReady(message,choices):
+    question = [{'type':'list','name':'option','message':message,'choices':choices}]
+    return prompt(question)["option"]
 
 def chapterTypeGenerator():
-     print("Enter the type of this chapter.\nEnter '1' for a language type.\nOr enter '2' for a math type.\nOr enter '3' for an english type.\nOf course without any commas.")
-     choice = input("Enter here : ")
-     if choice == "1":
-         return "language"
-     if choice == "2":
-         return "math"
-     if choice == "3":
-         return "english"
-     print("You have enterd an invalid input.\nPlease enter a valid input.")
-     return chapterTypeGenerator()
+     title = "Choose the type of this chapter:"
+     options = ["language","math","english"]
+     option = PyInquirer_prompt_wrapper_listReady(title,options)
+     return option
+
+def newInputChapterGenerator(onlineDataBase):
+    print("\n"+"New chapter:"+"\n"+"-"*15)
+    yearOfChapter = PyInquirer_prompt_wrapper_listReady("Choose the year of the test/pdf, the chapter is from. :",list(onlineDataBase.keys()))
+    periodOfChapter = PyInquirer_prompt_wrapper_listReady("Choose the period of the test/pdf, the chapter is from. :",list(onlineDataBase[yearOfChapter].keys()))
+    typeOfChapter = PyInquirer_prompt_wrapper_listReady("Choose the type of this chapter :",list(onlineDataBase[yearOfChapter][periodOfChapter].keys()))
+    numberOfChapter = PyInquirer_prompt_wrapper_listReady("Choose the ID of the Chapter (For example math 1 or math 2):",list(onlineDataBase[yearOfChapter][periodOfChapter][typeOfChapter].keys()))
+    tempChapter = PsychoTest_chapter(typeOfChapter, numberOfChapter, periodOfChapter, yearOfChapter)
+    tempChapter.enterAnswers()
+    print("This is the chapter you have entered: ")
+    print(tempChapter)
+        
+    while input("Are all the answers that had been entered are correct? If no enter 'no'. : ") == "no":
+        tempChapter.modifyAnswers()
+        print("This is the chapter you have entered: ")
+        print(tempChapter)
+    return tempChapter
+        
 
 
 logo = """

@@ -4,21 +4,40 @@
 
 import datetime
 import requests
+#from pick import pick
+from PyInquirer import prompt, Separator
 
 ChapterTypes = { "language": 23,"math": 20,"english": 22 } # a dictionary to set the diffrent types of Psychometry chapters
 OnlineDB_GET_Response = requests.get("https://raw.githubusercontent.com/FXP-Pscyhometery/FXP-Psychometry-Analyser/master/DataBase.json")
+cancelKeyWordOfRetrievers = "DON'T RETRIEVE ANY!"
+
+def PyInquirer_prompt_wrapper_listReady(message,choices):
+    question = [{'type':'list','name':'option','message':message,'choices':choices}]
+    return prompt(question)["option"]
 
 def chapterTypeGenerator():
-     print("Enter the type of this chapter.\nEnter '1' for a language type.\nOr enter '2' for a math type.\nOr enter '3' for an english type.\nOf course without any commas.")
-     choice = input("Enter here : ")
-     if choice == "1":
-         return "language"
-     if choice == "2":
-         return "math"
-     if choice == "3":
-         return "english"
-     print("You have enterd an invalid input.\nPlease enter a valid input.")
-     return chapterTypeGenerator()
+     title = "Choose the type of this chapter:"
+     options = ["language","math","english"]
+     option = PyInquirer_prompt_wrapper_listReady(title,options)
+     return option
+
+def newInputChapterGenerator(onlineDataBase):
+    print("\n"+"New chapter:"+"\n"+"-"*15)
+    yearOfChapter = PyInquirer_prompt_wrapper_listReady("Choose the year of the test/pdf, the chapter is from. :",list(onlineDataBase.keys()))
+    periodOfChapter = PyInquirer_prompt_wrapper_listReady("Choose the period of the test/pdf, the chapter is from. :",list(onlineDataBase[yearOfChapter].keys()))
+    typeOfChapter = PyInquirer_prompt_wrapper_listReady("Choose the type of this chapter :",list(onlineDataBase[yearOfChapter][periodOfChapter].keys()))
+    numberOfChapter = PyInquirer_prompt_wrapper_listReady("Choose the ID of the Chapter (For example math 1 or math 2):",list(onlineDataBase[yearOfChapter][periodOfChapter][typeOfChapter].keys()))
+    tempChapter = PsychoTest_chapter(typeOfChapter, numberOfChapter, periodOfChapter, yearOfChapter)
+    tempChapter.enterAnswers()
+    print("This is the chapter you have entered: ")
+    print(tempChapter)
+        
+    while input("Are all the answers that had been entered are correct? If no enter 'no'. : ") == "no":
+        tempChapter.modifyAnswers()
+        print("This is the chapter you have entered: ")
+        print(tempChapter)
+    return tempChapter
+        
 
 
 logo = """
@@ -66,7 +85,7 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
             self.q_a[i]= int(digit)
         print("Finished entering answers to this chapter!")
 
-    def modifyAnswers(self): #
+    def modifyAnswers(self): #Chapter answer modify
         print("Entered chapter modify state:")
         Times = input("How many q&a you want to modify?: ")
         if not Times.isdigit():
@@ -104,24 +123,8 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
             answer += f"| Question number {i+1} | Answer number {self.q_a[i]} |\n"
         answer+= "#"*40
         return answer
-#    def toDictForm(self,oldDataBase,mode): # Takes a given Chapter Object and returns a new dictonary rperesentation of the object. Used for seralization..
-#        if mode == "ADD":
-#            if not self.year in oldDataBase.keys():
-#                oldDataBase[self.year] = {}
-#            if not self.period in oldDataBase[self.year].keys():
-#                oldDataBase[self.year][self.period] = {}
-#            if not self.typeOfChapter in oldDataBase[self.year][self.period].keys():
-#                oldDataBase[self.year][self.period][self.typeOfChapter] = {}
-#            if i.numberOfChapter in oldDataBase[self.year][self.period][self.typeOfChapter].keys():
-#                print("This chapter already exist. Please go to MODIFY mode, to fix the wanted chapter answers in the database if needed.")
-#            else:
-#                oldDataBase[self.year][self.period][self.typeOfChapter][self.numberOfChapter] = self.q_a
 
-        
-#    def reCreate(self,typeOfChapter,numberOfChapter,period,year,q_a): # Takes a given dictionary and create/restore an object by it. Restoring from seralization.
-#        answer =  PsychoTest_chapter(typeOfChapter,numberOfChapter,period,year)
-#        answer.q_a = q_a
-#        return answer
+
     def compareWith_q_a_excluded(self, Chapter1): #When you want to check if an Chapter obj is the same of another, but not checking the q_a.
         if (Chapter1 == None) or (not isinstance(Chapter1,PsychoTest_chapter)):
             return False
@@ -143,7 +146,7 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
             return "Please contact Forum managment, the chapter's answers ( q_a ) at DataBase is empty."
         if self.is_q_a_Empty():
             print("For some reason, the chapter is empty, meaning it doesn't have your answers filled.")
-            if input("Would you like to enter/reenter the answers? To do so write 'yes', else press any key. : ") == "yes":
+            if PyInquirer_prompt_wrapper_listReady("Would you like to enter/reenter the answers? :",["yes","no"]) == "yes":
                 self.enterAnswers()
             else:
                 return "Tried to check an empty chapter."
@@ -200,11 +203,18 @@ class PsychoTest_chapter: #A class for a psychometry generic-type chapter
 
 class PsychoTest_test:
 
-    def __init__(self, nameOfTest):
+    def __init__(self, nameOfTest=""):
+        if nameOfTest == "":
+            self.nameOfTest = self.newName()
         self.chapters  = []
-        self.nameOfTest = nameOfTest
         self.creationOfTestObject_DateTime = str(datetime.datetime.now())
         self.test_results = {}
+    def newName(self):
+        nameOfNewTestObject = input("Enter a name of your choice for your test. : ")
+        if nameOfNewTestObject == cancelKeyWordOfRetrievers:
+            print("You little trouble maker, you have chosen a prohibited name from usage for a test.\nSorry. :)\nTherefore please type a valid new name.")
+            return self.newName()
+        return nameOfNewTestObject
     def addChapter(self,newChapter):
         if not isinstance(newChapter, PsychoTest_chapter):
             return "Not Added, you have not used an argument that is the correct type of Object or have entered None."
@@ -214,10 +224,10 @@ class PsychoTest_test:
             for i in self.chapters:
                 if newChapter.compareWith_q_a_excluded(i):
                     print(f"You have this chapter already in this Test, that named {self.nameOfTest}.")
-                    if input("Would you liked to replace the previous chapter? Enter yes or no: ").lower() == "yes":
+                    if PyInquirer_prompt_wrapper_listReady("Would you liked to replace the previous chapter? :",["yes","no"]) == "yes":
                         i.q_a = newChapter.q_a
                         return "Old Chapter was replaced."
-                    elif input("Would you liked to modify the previous chapter's answers only? Enter yes or no: ").lower() == "yes":
+                    elif PyInquirer_prompt_wrapper_listReady("Would you liked to modify the previous chapter's answers only? :",["yes","no"]) == "yes":
                         i.modifyAnswers()
                         return "Old Chapter was modified."
                     return "No changes."
@@ -230,7 +240,7 @@ class PsychoTest_test:
         if self.test_results != {}:
             for i in self.chapters:
                 print(self.test_results[i.year][i.period][i.typeOfChapter][i.numberOfChapter]["Result"]["__str__"]["with_out_actual_correct_answers"])
-            if input("Would you like to see the actual correct answers? Enter 'yes' to do so, else press any key. : ") == "yes":
+            if PyInquirer_prompt_wrapper_listReady("Would you like to see the actual correct answers? :",["yes","no"]) == "yes":
                 for i in self.chapters:
                     print(self.test_results[i.year][i.period][i.typeOfChapter][i.numberOfChapter]["Result"]["__str__"]["with_actual_correct_answers"])
             return f"Finished checking the test that is named {self.nameOfTest}, and that was created at {self.creationOfTestObject_DateTime}. "
@@ -242,7 +252,7 @@ class PsychoTest_test:
                     self.test_results[i.year][i.period][i.typeOfChapter][i.numberOfChapter] = {"q_a": i.q_a, "Result":chapterAnalysis}
                 else:
                     print("Error: addingToDataBase() returned False, and test_result of {self.nameOfTest} is empty!!")
-        if input("Would you like to see the actual correct answers? Enter 'yes' to do so, else press any key. : ") == "yes":
+        if PyInquirer_prompt_wrapper_listReady("Would you like to see the actual correct answers? :",["yes","no"]) == "yes":
             for i in self.chapters:
                 print(self.test_results[i.year][i.period][i.typeOfChapter][i.numberOfChapter]["Result"]["__str__"]["with_actual_correct_answers"])
         return f"Finished checking the test that is named {self.nameOfTest}, and that was created at {self.creationOfTestObject_DateTime}. "
@@ -271,11 +281,11 @@ class PsychoTest_test:
             return False #No action was taken since parameter isn't a dictionary, so returns false for no action happend.
         if self.nameOfTest in DB:
             print("You already have a test with the same name.")
-            if input("Do you wish to choose a different name for the new test? enter 'yes' to do so. : ")=="yes":
-                self.nameOfTest = input("Enter new name here : ")
+            if PyInquirer_prompt_wrapper_listReady("Do you wish to choose a different name for the new test? :",["yes","no"]) == "yes":
+                self.nameOfTest = self.newName()
                 DB[self.nameOfTest] = {self.creationOfTestObject_DateTime:self.test_results}
                 return True
-            elif input("Do you wish to add a new version with the same name, but different time of creation? enter 'yes' to do so. : ") == "yes":
+            elif PyInquirer_prompt_wrapper_listReady("Do you wish to add a new version with the same name, but different time of creation? :",["yes","no"]) == "yes":
                 DB[self.nameOfTest][self.creationOfTestObject_DateTime] = self.test_results
                 return True
         DB[self.nameOfTest] = {self.creationOfTestObject_DateTime:self.test_results}
