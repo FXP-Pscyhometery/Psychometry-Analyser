@@ -565,8 +565,6 @@ Main_Menu = ["""1) Add a new test.
 
 runMenu = True
 while runMenu:
-    #print(Main_message)
-    #user_selected_this_option = input("Enter here the option you want to proceed with. Remember, enter the digit! : ")
     user_selected_this_option = PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("MAIN MENU:",Main_Menu)[0]
     if user_selected_this_option == "1":
         print(ADDmode(DataBases))

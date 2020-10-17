@@ -4,6 +4,7 @@ import time
 from PsychoTest_Classes import PsychoTest_Classes
 import requests
 import os
+from PyInquirer import Separator
 os.system("title Psychometry Analyser - Management")
 def ADDmode(oldDataBase): # Function that collects information, answers, and anything to create and add to the temporary DataBase.
     print("Welcome to ADD mode! For each chapter, you will be asked to enter releavent data.")
@@ -119,28 +120,23 @@ else:
             oldDataBase = {}
         else:
             exit()
-if input("Would like to see DataBase here first? Enter 'yes' to do so. : ") == "yes":
+if PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("Would like to see DataBase here first? :",["yes","no"]) == "yes":
     print(json.dumps(oldDataBase, indent=4))
+    input("Press the Enter key to continue. : ")
 
-mainAlgoMessage = """
-What would you like to do?
-If you would like to add a new test/chapter to the official results, enter 'ADD'.
-If you would like to change/update/modify/edit the official results, enter 'MODIFY'.
-If you would like to delete tests/chapters from the official results, enter 'DELETE'. 
-Enter down below:
-"""
-print(mainAlgoMessage)
-state = input()
-
-while state in ["ADD","DELETE","MODIFY"]:
-    if state == "ADD":
+Main_Menu = ["1)Add new test/chapter to the official results.",Separator("\n"+"#"*60+"\n"),"2)Change/update/modify/edit tests/chapters from/of the official results.",Separator("\n"+"#"*60+"\n"),"3)Delete tests/chapters from the official results.",Separator("\n"+"#"*60+"\n"),"4)Exit and save changes to new local file."]
+runMain = True
+while runMain:
+    option = PsychoTest_Classes.PyInquirer_prompt_wrapper_listReady("MAIN MENU:",Main_Menu)[0]
+    if option == "4":
+        runMain = False
+    elif option == "1":
         ADDmode(oldDataBase)
-    elif state == "MODIFY":
+    elif option == "2":
         MODIFYmode(oldDataBase)
-    elif state == "DELETE":
+    elif option == "3":
         DELETEmode(oldDataBase)
         
-    state = input("Which mode would you like to enter now? Enter like before, 'ADD' or 'MODIFY' or 'DELETE'. Or press Enter to contiue to exit. : ")
 
 
 print("Now creating the new version of the DataBase, which you would need to upload/replace manually later.")
