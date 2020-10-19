@@ -32,10 +32,13 @@ def HistogramsGraphGenerator(title,x,y,labels={"x":"x","y":"y"},text=None,hovert
     if not isinstance(y,list):
         print("ERROR: Invalid y argument for graphGenerator.\n y isn\'t a list type.")
         return
-    fig = plotly_express.bar(x=x,y=y,labels=labels,title=title,text=text)
-    if isinstance(hovertemplate,str) and len(hovertemplate)>0:
-        fig.update_traces(hovertemplate=hovertemplate)
-    fig.show()
+    try:
+        fig = plotly_express.bar(x=x,y=y,labels=labels,title=title,text=text)
+        if isinstance(hovertemplate,str) and len(hovertemplate)>0:
+            fig.update_traces(hovertemplate=hovertemplate)
+        fig.show()
+    except:
+        print("ERROR: HistogramsGenerator raise an exception.\nFailed to run Ploty.express bar graph.!!!")
     input("Press the enter key to continue or enter any key : ")
     return
 
