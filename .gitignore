@@ -1,2 +1,10 @@
 
 *.pyc
+*.spec
+*.toc
+*.pkg
+*.manifest
+Users App/build/Psychometry Analyser/base_library.zip
+*.pyz
+Users App/build/Psychometry Analyser/warn-Psychometry Analyser.txt
+Users App/build/Psychometry Analyser/xref-Psychometry Analyser.html
