@@ -1,8 +1,8 @@
-# FXP-Psychometry-Analyser
+# Psychometry-Analyser
 ![alt text](Logo.png?raw=true)
 
 
-Hebrew explaination and project page : https://www.fxp.co.il/showthread.php?t=20591522
+
 
 Psychometry Analyser is an open source software in a CLI interface for documentation and analysis of users Psychometry simulations and practice tests.
 The software let's the user upload his results to a local database, and the software compare and analyse accourding to the correct results that are on the online database.
