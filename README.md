@@ -1,5 +1,4 @@
 # Psychometry-Analyser
-![alt text](Logo.png?raw=true)
 
 
 
